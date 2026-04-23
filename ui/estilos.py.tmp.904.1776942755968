@@ -1,0 +1,599 @@
+"""
+ui/estilos.py — Design system baseado no painel_executivo_my_city_metalco.html
+"""
+import streamlit as st
+
+
+def _css(dark: bool) -> str:
+    if dark:
+        bg       = "#1A1D24"
+        bg2      = "#22262F"
+        card     = "#22262F"
+        card2    = "#2A2F3A"
+        txt      = "#F1F3F7"
+        ink2     = "#C9D0DC"
+        muted    = "#8891A3"
+        ink4     = "#575F6E"
+        border   = "rgba(255,255,255,0.06)"
+        border2  = "rgba(255,255,255,0.10)"
+        side_bg  = "#1A1D24"
+        side_bdr = "rgba(255,255,255,0.10)"
+        side_txt = "#C9D0DC"
+        side_lbl = "#575F6E"
+        input_bg = "#22262F"
+        tag_bg   = "#2A2F3A"
+        accent_l = "#1E3A7A"
+        teal_l   = "#063D30"
+        rose_l   = "#4C0D20"
+        green_l  = "#052E16"
+        shadow   = "0 1px 3px rgba(0,0,0,0.35)"
+        shadow_h = "0 4px 16px rgba(0,0,0,0.50)"
+        btn_sec  = "background:#2A2F3A;color:#8891A3;border:0.5px solid rgba(255,255,255,0.10);"
+        nav_bg   = "#22262F"
+    else:
+        bg       = "#F7F8FA"
+        bg2      = "#F0F2F5"
+        card     = "#FFFFFF"
+        card2    = "#F7F8FA"
+        txt      = "#0E1117"
+        ink2     = "#343A46"
+        muted    = "#6B7280"
+        ink4     = "#9CA3AF"
+        border   = "rgba(0,0,0,0.07)"
+        border2  = "rgba(0,0,0,0.12)"
+        side_bg  = "#FFFFFF"
+        side_bdr = "rgba(0,0,0,0.12)"
+        side_txt = "#343A46"
+        side_lbl = "#9CA3AF"
+        input_bg = "#F7F8FA"
+        tag_bg   = "#EBF1FF"
+        accent_l = "#EBF1FF"
+        teal_l   = "#E0F5F0"
+        rose_l   = "#FFE4EC"
+        green_l  = "#DCFCE7"
+        shadow   = "0 0.5px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)"
+        shadow_h = "0 4px 16px rgba(0,0,0,0.10)"
+        btn_sec  = "background:#F7F8FA;color:#6B7280;border:0.5px solid rgba(0,0,0,0.12);"
+        nav_bg   = "#FFFFFF"
+
+    _dark_chart = f"""
+    .js-plotly-plot .xtick text,
+    .js-plotly-plot .ytick text,
+    .js-plotly-plot .g-xtitle text,
+    .js-plotly-plot .g-ytitle text,
+    .js-plotly-plot .legendtext,
+    .js-plotly-plot .annotation-text tspan,
+    .js-plotly-plot .gtitle tspan {{
+        fill: #C9D0DC !important;
+    }}
+    .js-plotly-plot .xgrid,
+    .js-plotly-plot .ygrid {{
+        stroke: rgba(255,255,255,0.06) !important;
+        opacity: 0.7 !important;
+    }}
+    .js-plotly-plot .zerolinelayer path {{
+        stroke: rgba(255,255,255,0.10) !important;
+    }}
+    [data-testid="stPlotlyChart"] > div {{
+        background: {card} !important;
+    }}
+    """ if dark else ""
+
+    return f"""
+<style>
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── Reset / base ─────────────────────────────────────────────────────────── */
+*, html, body, [class*="css"] {{
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif !important;
+    box-sizing: border-box;
+}}
+
+/* ── App ──────────────────────────────────────────────────────────────────── */
+.stApp, .main, section.main {{ background:{bg} !important; }}
+.main .block-container {{
+    background:{bg} !important;
+    padding: 0 !important;
+    max-width:100% !important;
+}}
+.main .block-container > div:first-child {{
+    padding: 1rem 1.4rem 2rem !important;
+}}
+
+/* ── Masthead / Navbar ────────────────────────────────────────────────────── */
+.masthead {{
+    background: {nav_bg};
+    border: 0.5px solid {border2};
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 56px;
+    margin-bottom: 18px;
+    box-shadow: {shadow};
+}}
+.masthead-brand {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}}
+.masthead-logo {{
+    width: 30px; height: 30px;
+    background: {txt};
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}}
+.masthead-logo svg {{
+    width: 16px; height: 16px;
+    fill: {card};
+}}
+.masthead-title {{
+    font-family: 'DM Serif Display', Georgia, serif !important;
+    font-size: 16px;
+    color: {txt};
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    font-weight: 400 !important;
+}}
+.masthead-sub {{
+    font-size: 10.5px;
+    font-weight: 400;
+    color: {muted};
+    margin-top: 1px;
+    letter-spacing: 0.01em;
+}}
+.masthead-right {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}}
+.masthead-pill {{
+    background: {bg2};
+    border: 0.5px solid {border2};
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: {muted};
+    white-space: nowrap;
+}}
+.masthead-pill.accent {{
+    background: #1A6BF5;
+    border-color: #1A6BF5;
+    color: #fff;
+}}
+
+/* ── KPI Grid ─────────────────────────────────────────────────────────────── */
+.kpi-grid {{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin: 0 0 4px;
+}}
+.kpi-card {{
+    background: {card};
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    border: 0.5px solid {border2};
+    box-shadow: {shadow};
+    transition: box-shadow .18s ease, transform .18s ease;
+    position: relative; overflow: hidden;
+    cursor: default;
+}}
+.kpi-card:hover {{
+    box-shadow: {shadow_h};
+    transform: translateY(-1px);
+}}
+.kpi-top {{
+    display:flex; align-items:center; gap:7px; margin-bottom:10px;
+}}
+.kpi-icon {{
+    width:28px; height:28px;
+    border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.9rem; flex-shrink:0;
+}}
+.kpi-label {{
+    font-size:.67rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:.07em;
+    color:{ink4};
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    line-height:1.2;
+}}
+.kpi-value {{
+    font-family: 'DM Mono', monospace !important;
+    font-size:1.2rem; font-weight:500;
+    letter-spacing:-.03em; line-height:1.1;
+    color:{txt};
+    white-space:normal; word-break:break-word;
+}}
+.kpi-sub {{
+    font-size:.67rem; color:{muted};
+    margin-top:4px; font-weight:400;
+}}
+.kpi-badge {{
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 9.5px;
+    font-weight: 600;
+    margin-top: 5px;
+}}
+.badge-up   {{ background: {green_l}; color: #16A34A; }}
+.badge-down {{ background: {rose_l};  color: #E11D48; }}
+.badge-neu  {{ background: {bg2};     color: {muted}; }}
+
+/* ── Seletor empresa (toggle botões) ──────────────────────────────────────── */
+.emp-toggle {{ margin-bottom: 4px; }}
+.emp-toggle .stButton button {{
+    border-radius: 100px !important;
+    font-size: .80rem !important;
+    font-weight: 600 !important;
+    padding: 6px 16px !important;
+    transition: all .18s ease !important;
+    {btn_sec}
+}}
+.emp-toggle .stButton button[kind="primary"] {{
+    background: #1A6BF5 !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(26,107,245,.25) !important;
+}}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.empty-state {{
+    text-align:center; padding:60px 20px;
+}}
+.empty-icon {{ font-size:3rem; margin-bottom:12px; }}
+.empty-title {{
+    font-size:1rem; font-weight:600;
+    color:{txt}; margin-bottom:6px;
+}}
+.empty-sub {{
+    font-size:.84rem; color:{muted}; max-width:420px; margin:0 auto;
+}}
+.empty-sub code {{
+    background:{tag_bg}; padding:1px 6px;
+    border-radius:4px; font-size:.82em;
+}}
+
+/* ── Charts container ─────────────────────────────────────────────────────── */
+[data-testid="stPlotlyChart"] > div {{
+    background:{card} !important;
+    border-radius:12px !important;
+    padding:4px !important;
+    box-shadow:{shadow} !important;
+    border:0.5px solid {border2} !important;
+    transition: box-shadow .18s ease, transform .18s ease !important;
+}}
+[data-testid="stPlotlyChart"] > div:hover {{
+    box-shadow:{shadow_h} !important;
+    transform:translateY(-1px) !important;
+}}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+[data-testid="stSidebar"] {{
+    display: flex !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    background:{side_bg} !important;
+    border-right: 0.5px solid {side_bdr} !important;
+    min-width: 230px !important;
+}}
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+button[aria-label="Open sidebar"],
+button[aria-label="Close sidebar"] {{
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+}}
+[data-testid="stSidebar"] * {{ color:{side_txt} !important; }}
+[data-testid="stSidebar"] label {{
+    color:{side_lbl} !important; font-size:.65rem !important;
+    text-transform:uppercase; letter-spacing:.09em; font-weight:600;
+}}
+[data-testid="stSidebar"] .stMarkdown p {{
+    color:{side_txt} !important; font-size:.82rem !important;
+}}
+[data-testid="stSidebar"] hr {{
+    border-color:{border} !important; opacity:1 !important;
+}}
+[data-testid="stSidebar"] .stButton button {{
+    background:{bg2} !important;
+    border:0.5px solid {border2} !important;
+    color:{ink2} !important; font-weight:600 !important;
+    border-radius:8px !important;
+    transition:background .15s ease !important;
+}}
+[data-testid="stSidebar"] .stButton button:hover {{
+    background:{bg2} !important;
+    filter: brightness(0.97) !important;
+}}
+[data-testid="stSidebar"] .stButton button[kind="primary"] {{
+    background:#1A6BF5 !important;
+    border:none !important; color:white !important;
+    box-shadow:0 2px 10px rgba(26,107,245,.25) !important;
+}}
+
+/* Sidebar heading style */
+[data-testid="stSidebar"] .sb-logo {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 12px;
+    border-bottom: 0.5px solid {border};
+    margin-bottom: 8px;
+}}
+[data-testid="stSidebar"] .sb-logo-icon {{
+    width: 28px; height: 28px;
+    background: {txt};
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}}
+
+/* ── Abas (tabs) ──────────────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {{
+    background:{bg2} !important;
+    border-radius:10px !important;
+    padding:3px !important; gap:0 !important;
+    flex-wrap:wrap !important;
+    border:none !important;
+}}
+.stTabs [data-baseweb="tab"] {{
+    color:{muted} !important;
+    border-radius:7px !important;
+    font-size:.78rem !important; font-weight:500 !important;
+    padding:6px 14px !important;
+    white-space:nowrap !important;
+    transition:all .15s !important;
+    max-width:200px !important;
+}}
+.stTabs [data-baseweb="tab"]:hover {{
+    background:{card} !important;
+    color:{txt} !important;
+}}
+.stTabs [aria-selected="true"] {{
+    background:{card} !important; color:{txt} !important;
+    font-weight:600 !important;
+    box-shadow:{shadow} !important;
+    border:none !important;
+}}
+.stTabs [data-baseweb="tab-panel"] {{
+    background:{bg} !important; padding:16px 0 !important;
+}}
+
+/* ── Outer nav tabs (2 abas principais) ───────────────────────────────────── */
+.stTabs:first-of-type [data-baseweb="tab-list"] {{
+    background:transparent !important;
+    border:none !important;
+    padding:0 0 0 2px !important;
+    gap:4px !important;
+}}
+.stTabs:first-of-type [data-baseweb="tab"] {{
+    font-size:.86rem !important; font-weight:500 !important;
+    padding:8px 20px !important;
+    border-radius:8px !important;
+    background:{card} !important;
+    border:0.5px solid {border2} !important;
+    max-width:none !important;
+}}
+.stTabs:first-of-type [aria-selected="true"] {{
+    background:#1A6BF5 !important;
+    color:white !important;
+    border:none !important;
+    box-shadow:0 2px 10px rgba(26,107,245,.25) !important;
+}}
+
+/* ── DataFrames / editors ─────────────────────────────────────────────────── */
+[data-testid="stDataFrame"], [data-testid="stDataEditor"] {{
+    background:{card} !important;
+    border-radius:12px !important;
+    overflow:hidden !important;
+    box-shadow:{shadow} !important;
+    border:0.5px solid {border2} !important;
+}}
+
+/* ── Títulos de seção ─────────────────────────────────────────────────────── */
+.titulo-sec {{
+    font-size:.92rem; font-weight:600; color:{txt};
+    border-bottom:0.5px solid {border2};
+    padding-bottom:7px; margin:20px 0 12px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    letter-spacing:-.01em;
+}}
+
+/* ── Badges ───────────────────────────────────────────────────────────────── */
+.badge-sim {{
+    background:{green_l}; color:#16A34A;
+    padding:3px 10px; border-radius:100px;
+    font-weight:600; font-size:.72rem;
+    display:inline-block; letter-spacing:.03em;
+}}
+.badge-nao {{
+    background:{bg2}; color:{muted};
+    padding:3px 10px; border-radius:100px;
+    font-weight:600; font-size:.72rem;
+    display:inline-block; letter-spacing:.03em;
+    border:0.5px solid {border2};
+}}
+.periodo-badge {{
+    display:inline-flex; align-items:center; gap:5px;
+    background:{bg2}; color:{muted};
+    font-size:.72rem; font-weight:500;
+    padding:4px 12px; border-radius:100px;
+    border:0.5px solid {border2};
+}}
+.alerta-dev {{
+    background:#FFFBEB;
+    border:0.5px solid #F59E0B;
+    border-left:4px solid #F59E0B;
+    border-radius:10px; padding:14px 18px;
+    font-size:.84rem; color:#92400E; margin:12px 0;
+}}
+
+/* ── st.metric — override ─────────────────────────────────────────────────── */
+[data-testid="stMetricValue"] > div,
+[data-testid="stMetricValue"] {{
+    font-family: 'DM Mono', monospace !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word !important;
+    font-size: clamp(.82rem,1.8vw,1.22rem) !important;
+    font-weight: 500 !important;
+    color: {txt} !important;
+    letter-spacing: -0.02em !important;
+}}
+[data-testid="stMetricLabel"] > div,
+[data-testid="stMetricLabel"] {{
+    white-space: normal !important;
+    overflow: visible !important;
+    font-size: clamp(.6rem,1.1vw,.72rem) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .06em !important;
+    color: {ink4} !important;
+    line-height: 1.3 !important;
+}}
+[data-testid="stMetricDelta"] {{
+    font-size: .70rem !important;
+    font-weight: 500 !important;
+}}
+
+/* ── Texto geral ──────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {{ color:{txt} !important; }}
+h1, h2 {{ font-family: 'DM Serif Display', Georgia, serif !important; letter-spacing: -0.02em !important; font-weight: 400 !important; }}
+.stMarkdown p, .stMarkdown li {{ color:{txt} !important; }}
+.stMarkdown code {{
+    background:{tag_bg} !important; color:{txt} !important;
+    padding:2px 7px; border-radius:5px; font-size:.84em;
+}}
+small, .stCaption, [data-testid="stCaptionContainer"] {{
+    color:{muted} !important; font-size:.77rem !important;
+}}
+hr {{ border-color:{border2} !important; opacity:.8 !important; }}
+
+/* ── Alerts ───────────────────────────────────────────────────────────────── */
+[data-testid="stAlert"] {{
+    border-radius:10px !important;
+    border-left-width:4px !important;
+}}
+
+/* ── Inputs ───────────────────────────────────────────────────────────────── */
+[data-testid="stSelectbox"] > div > div {{
+    background:{input_bg} !important;
+    border-color:{border2} !important;
+    color:{txt} !important;
+    border-radius:8px !important;
+}}
+[data-testid="stRadio"] label {{ color:{txt} !important; font-size:.84rem !important; }}
+
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+[data-testid="stSpinner"] {{ color:#1A6BF5 !important; }}
+
+/* ── Botão primary global ─────────────────────────────────────────────────── */
+.stButton button[kind="primary"] {{
+    background:#1A6BF5 !important;
+    border:none !important; color:white !important;
+    font-weight:600 !important; border-radius:8px !important;
+    padding:7px 18px !important;
+    box-shadow:0 2px 10px rgba(26,107,245,.25) !important;
+    transition:all .18s ease !important;
+}}
+.stButton button[kind="primary"]:hover {{
+    transform:translateY(-1px) !important;
+    box-shadow:0 4px 18px rgba(26,107,245,.38) !important;
+}}
+
+/* ── Ocultar chrome Streamlit ─────────────────────────────────────────────── */
+#MainMenu, footer, .stDeployButton,
+[data-testid="stToolbar"] {{ display:none !important; }}
+
+/* ── Botão toggle da sidebar ─────────────────────────────────────────────── */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarCollapseButton"] {{
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+}}
+[data-testid="stSidebarCollapseButton"] svg {{
+    fill: {muted} !important;
+    color: {muted} !important;
+}}
+[data-testid="stSidebarCollapsedControl"] button {{
+    background: {bg2} !important;
+    border: 0.5px solid {border2} !important;
+    border-radius: 8px !important;
+}}
+
+/* ── Responsivo ───────────────────────────────────────────────────────────── */
+@media (max-width:1280px) {{
+    .kpi-grid {{ grid-template-columns: repeat(4,1fr); }}
+}}
+@media (max-width:900px) {{
+    .main .block-container > div:first-child {{ padding:0.8rem !important; }}
+    .kpi-grid {{ grid-template-columns: repeat(2,1fr); gap:8px; }}
+    .masthead {{ padding:0 12px; height:auto; padding-top:10px; padding-bottom:10px; flex-wrap:wrap; gap:8px; }}
+    .stTabs [data-baseweb="tab"] {{ font-size:.72rem !important; padding:5px 10px !important; }}
+    [data-testid="stPlotlyChart"] > div {{ border-radius:8px !important; }}
+    .main [data-testid="stHorizontalBlock"] {{
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }}
+    .main [data-testid="stHorizontalBlock"] > div {{
+        min-width: calc(50% - 4px) !important;
+        flex: 1 1 calc(50% - 4px) !important;
+        max-width: 100% !important;
+    }}
+}}
+@media (max-width:640px) {{
+    .main .block-container > div:first-child {{ padding:0.4rem 0.5rem 1rem !important; }}
+    .kpi-grid {{ grid-template-columns: repeat(2,1fr); gap:6px; }}
+    .kpi-card {{ padding:12px 12px 10px; }}
+    .masthead {{ padding:10px 12px; border-radius:10px; height:auto; flex-wrap:wrap; gap:8px; }}
+    .masthead-right {{ gap:5px; flex-wrap:wrap; }}
+    .masthead-pill {{ font-size:.62rem; padding:3px 8px; }}
+    [data-testid="stPlotlyChart"] > div {{
+        border-radius:8px !important;
+        overflow-x: auto !important;
+    }}
+    .stTabs [data-baseweb="tab-list"] {{ flex-wrap:wrap !important; }}
+    .stTabs [data-baseweb="tab"] {{
+        font-size:.68rem !important;
+        padding:5px 8px !important;
+        white-space:nowrap !important;
+    }}
+    .stTabs:first-of-type [data-baseweb="tab"] {{
+        font-size:.74rem !important;
+        padding:7px 10px !important;
+    }}
+    .main [data-testid="stHorizontalBlock"] {{
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }}
+    .main [data-testid="stHorizontalBlock"] > div {{
+        min-width: 100% !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+    }}
+    .titulo-sec {{ font-size:.85rem; white-space:normal; }}
+}}
+
+{_dark_chart}
+</style>
+"""
+
+
+def aplicar_css(dark: bool = False) -> None:
+    st.markdown(_css(dark), unsafe_allow_html=True)

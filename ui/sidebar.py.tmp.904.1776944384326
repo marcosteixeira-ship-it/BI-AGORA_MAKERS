@@ -1,0 +1,160 @@
+"""
+ui/sidebar.py
+Barra lateral completa do painel.
+Retorna os valores dos controles para uso nas abas.
+
+Uso:
+    from ui.sidebar import renderizar_sidebar
+    cfg = renderizar_sidebar(pasta_dados, arquivos_fn=fat_arquivos)
+    flag_ic        = cfg["flag_ic"]
+    mostrar_vazios = cfg["mostrar_vazios"]
+    n_linhas       = cfg["n_linhas"]
+    data_inicio    = cfg["data_inicio"]
+    data_fim       = cfg["data_fim"]
+"""
+
+import streamlit as st
+from datetime import date
+
+# ── Prefixo de todas as keys da sidebar ──────────────────────────────────────
+# Evita colisão com widgets de abas/expanders que usem nomes genéricos.
+_K = "sb_"
+
+
+def renderizar_sidebar(pasta_dados: str, arquivos_fn) -> dict:
+    with st.sidebar:
+
+        # ── Logo / título ─────────────────────────────────────────────────────
+        st.markdown("""
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 4px 12px;">
+            <div style="width:28px;height:28px;border-radius:7px;flex-shrink:0;
+                 background:#1A5C3A;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 16 16" fill="white" width="14" height="14">
+                    <rect x="2" y="2" width="5" height="5" rx="1"/>
+                    <rect x="9" y="2" width="5" height="5" rx="1"/>
+                    <rect x="2" y="9" width="5" height="5" rx="1"/>
+                    <rect x="9" y="9" width="5" height="5" rx="1"/>
+                </svg>
+            </div>
+            <div>
+                <div style="font-family:'DM Serif Display',Georgia,serif;font-size:15px;
+                     letter-spacing:-0.02em;line-height:1.2;">
+                    Painel Executivo
+                </div>
+                <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;
+                     margin-top:1px;opacity:0.55;">
+                    My City · Metalco
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.divider()
+
+        # ── Tema ──────────────────────────────────────────────────────────────
+        # Usa key="tema_escuro" diretamente — sem value= para evitar conflito
+        # com session_state pre-existente (bug: label da key vaza como texto).
+        if "tema_escuro" not in st.session_state:
+            st.session_state.tema_escuro = False
+
+        _tema_antes = st.session_state.tema_escuro
+        st.toggle("🌙 Tema escuro", key="tema_escuro")
+        if st.session_state.tema_escuro != _tema_antes:
+            st.rerun()
+
+        st.divider()
+
+        # ── Status de arquivos ────────────────────────────────────────────────
+        st.markdown("**📁 ARQUIVOS**")
+        cores = {"omp": "#1A56DB", "mtc": "#057A55"}
+        nomes = {"omp": "ftc002omp.csv", "mtc": "ftc002mtc.csv"}
+        try:
+            disp = arquivos_fn(pasta_dados)
+            for suf, existe in disp.items():
+                cor = cores.get(suf, "#999")
+                st.markdown(
+                    f'<span style="color:{cor}">●</span> '
+                    f'<code>{nomes.get(suf, suf)}</code> {"✅" if existe else "❌"}',
+                    unsafe_allow_html=True,
+                )
+        except Exception:
+            st.caption("(status indisponível)")
+
+        st.divider()
+
+        # ── Intercompany ──────────────────────────────────────────────────────
+        st.markdown("**🔀 INTERCOMPANY**")
+        st.caption("Exclui transações entre empresas do grupo quando SIM.")
+        flag_ic = st.selectbox(
+            "Filtro IC",
+            options=["NÃO", "SIM"],
+            index=0,
+            key=f"{_K}flag_ic",
+        )
+
+        st.divider()
+
+        # ── Filtro de período ─────────────────────────────────────────────────
+        st.markdown("**📅 PERÍODO**")
+        modo_data = st.radio(
+            "Modo de período",
+            options=["Atual", "Personalizado"],
+            index=0,
+            label_visibility="collapsed",
+            key=f"{_K}modo_data",
+        )
+
+        hoje = date.today()
+        if modo_data == "Atual":
+            data_inicio = None
+            data_fim    = hoje
+            st.caption(f"Dados até {hoje.strftime('%d/%m/%Y')}")
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                data_inicio = st.date_input(
+                    "De",
+                    value=date(hoje.year, 1, 1),
+                    key=f"{_K}data_inicio",
+                    format="DD/MM/YYYY",
+                )
+            with c2:
+                data_fim = st.date_input(
+                    "Até",
+                    value=hoje,
+                    key=f"{_K}data_fim",
+                    format="DD/MM/YYYY",
+                )
+            if data_inicio and data_fim and data_inicio > data_fim:
+                st.warning("⚠️ Data inicial maior que a final.")
+
+        st.divider()
+
+        # ── Outros filtros ────────────────────────────────────────────────────
+        # Keys explícitas evitam auto-geração por posição, que muda quando
+        # o bloco condicional de datas insere/remove widgets acima destes.
+        st.markdown("**🔍 VISUALIZAÇÃO**")
+        mostrar_vazios = st.toggle(
+            "Mostrar linhas excluídas (IC/Própria)",
+            key=f"{_K}mostrar_vazios",
+        )
+        n_linhas = st.slider(
+            "Linhas na tabela",
+            min_value=10, max_value=500, value=50, step=10,
+            key=f"{_K}n_linhas",
+        )
+
+        st.divider()
+
+        if st.button("🔄 Reprocessar", use_container_width=True, type="primary",
+                     key=f"{_K}btn_reprocessar"):
+            st.cache_data.clear()
+            st.rerun()
+
+    return {
+        "flag_ic":        flag_ic,
+        "mostrar_vazios": mostrar_vazios,
+        "n_linhas":       n_linhas,
+        "data_inicio":    data_inicio,
+        "data_fim":       data_fim,
+        "tema_escuro":    st.session_state.get("tema_escuro", False),
+    }

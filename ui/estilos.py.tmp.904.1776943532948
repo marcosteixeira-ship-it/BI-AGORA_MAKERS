@@ -1,0 +1,562 @@
+"""
+ui/estilos.py — Design system · Agora Makers (verde #1A5C3A, preto, branco)
+"""
+import streamlit as st
+
+# ── Paleta da marca ────────────────────────────────────────────────────────────
+_GREEN      = "#1A5C3A"   # verde primário (logo)
+_GREEN_H    = "#164D30"   # hover
+_GREEN_L_LT = "#E6F4EC"   # bg claro (light)
+_GREEN_L_DK = "#0F3022"   # bg claro (dark)
+_GREEN_ACC  = "#22A56A"   # accent no dark mode
+
+
+def _css(dark: bool) -> str:
+    accent   = _GREEN_ACC  if dark else _GREEN
+    accent_l = _GREEN_L_DK if dark else _GREEN_L_LT
+
+    if dark:
+        bg      = "#1A1D24"
+        bg2     = "#22262F"
+        card    = "#22262F"
+        card2   = "#2A2F3A"
+        txt     = "#F1F3F7"
+        ink2    = "#C9D0DC"
+        muted   = "#8891A3"
+        ink4    = "#575F6E"
+        border  = "rgba(255,255,255,0.06)"
+        border2 = "rgba(255,255,255,0.10)"
+        side_bg = "#1A1D24"
+        side_bdr = "rgba(255,255,255,0.10)"
+        side_txt = "#C9D0DC"
+        side_lbl = "#575F6E"
+        input_bg = "#22262F"
+        shadow   = "0 1px 3px rgba(0,0,0,0.40)"
+        shadow_h = "0 4px 16px rgba(0,0,0,0.55)"
+        btn_sec  = f"background:#2A2F3A;color:#8891A3;border:0.5px solid rgba(255,255,255,0.10);"
+        logo_bg  = _GREEN_ACC
+        logo_fg  = "#fff"
+        icon_rb  = "#1E3A7A"; icon_rb_bg  = "#1E2D5C"
+        icon_imp = "#4C0D20"; icon_imp_bg = "#4C0D20"
+        icon_rl  = "#063D30"; icon_rl_bg  = "#063D30"
+        icon_cpv = "#422005"; icon_cpv_bg = "#422005"
+        icon_mg_bg = _GREEN_L_DK
+        icon_nf_bg = "#2A2F3A"
+        icon_cl_bg = "#2E1065"
+    else:
+        bg      = "#F5F7F5"
+        bg2     = "#EEF1EE"
+        card    = "#FFFFFF"
+        card2   = "#F5F7F5"
+        txt     = "#0E1117"
+        ink2    = "#343A46"
+        muted   = "#6B7280"
+        ink4    = "#9CA3AF"
+        border  = "rgba(0,0,0,0.07)"
+        border2 = "rgba(0,0,0,0.12)"
+        side_bg = "#FFFFFF"
+        side_bdr = "rgba(0,0,0,0.12)"
+        side_txt = "#343A46"
+        side_lbl = "#9CA3AF"
+        input_bg = "#F5F7F5"
+        shadow   = "0 0.5px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)"
+        shadow_h = "0 4px 16px rgba(0,0,0,0.10)"
+        btn_sec  = f"background:#F5F7F5;color:#6B7280;border:0.5px solid rgba(0,0,0,0.12);"
+        logo_bg  = _GREEN
+        logo_fg  = "#fff"
+        icon_rb  = "#EBF1FF"; icon_rb_bg  = "#EBF1FF"
+        icon_imp = "#FFE4EC"; icon_imp_bg = "#FFE4EC"
+        icon_rl  = "#E0F5F0"; icon_rl_bg  = "#E0F5F0"
+        icon_cpv = "#FEF3C7"; icon_cpv_bg = "#FEF3C7"
+        icon_mg_bg = _GREEN_L_LT
+        icon_nf_bg = "#F0F2F5"
+        icon_cl_bg = "#EDE9FE"
+
+    _dark_chart = f"""
+    .js-plotly-plot .xtick text,.js-plotly-plot .ytick text,
+    .js-plotly-plot .g-xtitle text,.js-plotly-plot .g-ytitle text,
+    .js-plotly-plot .legendtext,.js-plotly-plot .gtitle tspan {{
+        fill: #C9D0DC !important;
+    }}
+    .js-plotly-plot .xgrid,.js-plotly-plot .ygrid {{
+        stroke: rgba(255,255,255,0.06) !important; opacity:.7 !important;
+    }}
+    [data-testid="stPlotlyChart"] > div {{ background:{card} !important; }}
+    """ if dark else ""
+
+    return f"""
+<style>
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── Reset / base ─────────────────────────────────────────────────────────── */
+*,html,body,[class*="css"] {{
+    font-family:'Outfit',system-ui,-apple-system,sans-serif !important;
+    box-sizing:border-box;
+}}
+
+/* ── App background ───────────────────────────────────────────────────────── */
+.stApp,.main,section.main {{ background:{bg} !important; }}
+.main .block-container {{
+    background:{bg} !important;
+    padding:0 !important; max-width:100% !important;
+}}
+.main .block-container > div:first-child {{
+    padding:1rem 1.4rem 2rem !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MASTHEAD / NAVBAR
+══════════════════════════════════════════════════════════════════════════ */
+.masthead {{
+    background:{card};
+    border:0.5px solid {border2};
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    height:54px;
+    margin-bottom:14px;
+    box-shadow:{shadow};
+    flex-wrap:wrap;
+    gap:8px;
+}}
+.masthead-brand {{
+    display:flex; align-items:center; gap:10px;
+}}
+.masthead-logo {{
+    width:30px; height:30px;
+    background:{logo_bg};
+    border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+}}
+.masthead-logo svg {{ width:15px; height:15px; fill:{logo_fg}; }}
+.masthead-title {{
+    font-family:'DM Serif Display',Georgia,serif !important;
+    font-size:15.5px;
+    color:{txt};
+    letter-spacing:-0.02em;
+    line-height:1.15;
+    font-weight:400 !important;
+}}
+.masthead-sub {{
+    font-size:10px;
+    font-weight:400;
+    color:{muted};
+    margin-top:1px;
+}}
+.masthead-right {{
+    display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+}}
+.masthead-pill {{
+    background:{bg2};
+    border:0.5px solid {border2};
+    border-radius:100px;
+    padding:4px 11px;
+    font-size:10.5px;
+    font-weight:500;
+    color:{muted};
+    white-space:nowrap;
+}}
+.masthead-pill.green {{
+    background:{accent_l};
+    border-color:{accent};
+    color:{accent};
+    font-weight:600;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KPI HEADER ROW (cabeçalho com números)
+══════════════════════════════════════════════════════════════════════════ */
+.kpi-hdr {{
+    display:grid;
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:16px;
+}}
+.kha-card {{
+    background:{card};
+    border:0.5px solid {border2};
+    border-radius:12px;
+    padding:12px 14px 10px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:{shadow};
+    transition:box-shadow .18s ease, transform .18s ease;
+}}
+.kha-card:hover {{
+    box-shadow:{shadow_h};
+    transform:translateY(-1px);
+}}
+.kha-icon {{
+    position:absolute;
+    right:10px; top:10px;
+    width:26px; height:26px;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+}}
+.kha-label {{
+    font-size:9px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:{ink4};
+    margin-bottom:5px;
+    padding-right:30px;
+}}
+.kha-value {{
+    font-family:'DM Mono',monospace !important;
+    font-size:15px;
+    font-weight:500;
+    letter-spacing:-0.02em;
+    line-height:1.1;
+    color:{txt};
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}}
+.kha-sub {{
+    font-size:9.5px;
+    color:{muted};
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KPI CARDS (usados em outras abas)
+══════════════════════════════════════════════════════════════════════════ */
+.kpi-grid {{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:10px; margin:0 0 4px;
+}}
+.kpi-card {{
+    background:{card};
+    border-radius:12px;
+    padding:14px 16px 12px;
+    border:0.5px solid {border2};
+    box-shadow:{shadow};
+    transition:box-shadow .18s ease, transform .18s ease;
+    position:relative; overflow:hidden;
+    cursor:default;
+}}
+.kpi-card:hover {{
+    box-shadow:{shadow_h};
+    transform:translateY(-1px);
+}}
+.kpi-top {{ display:flex; align-items:center; gap:7px; margin-bottom:10px; }}
+.kpi-icon {{
+    width:28px; height:28px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.9rem; flex-shrink:0;
+}}
+.kpi-label {{
+    font-size:.67rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:.07em;
+    color:{ink4};
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    line-height:1.2;
+}}
+.kpi-value {{
+    font-family:'DM Mono',monospace !important;
+    font-size:1.2rem; font-weight:500;
+    letter-spacing:-.03em; line-height:1.1;
+    color:{txt};
+}}
+.kpi-sub {{ font-size:.67rem; color:{muted}; margin-top:4px; }}
+.kpi-badge {{
+    display:inline-flex; align-items:center; gap:2px;
+    padding:2px 8px; border-radius:100px;
+    font-size:9.5px; font-weight:600; margin-top:5px;
+}}
+.badge-up   {{ background:{_GREEN_L_LT}; color:{_GREEN}; }}
+.badge-down {{ background:#FFE4EC; color:#E11D48; }}
+.badge-neu  {{ background:{bg2}; color:{muted}; }}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SELETOR EMPRESA
+══════════════════════════════════════════════════════════════════════════ */
+.emp-toggle {{ margin-bottom:4px; }}
+.emp-toggle .stButton button {{
+    border-radius:100px !important;
+    font-size:.80rem !important; font-weight:600 !important;
+    padding:6px 16px !important;
+    transition:all .18s ease !important;
+    {btn_sec}
+}}
+.emp-toggle .stButton button[kind="primary"] {{
+    background:{accent} !important;
+    color:white !important; border:none !important;
+    box-shadow:0 2px 10px rgba(26,92,58,.30) !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stPlotlyChart"] > div {{
+    background:{card} !important;
+    border-radius:12px !important; padding:4px !important;
+    box-shadow:{shadow} !important;
+    border:0.5px solid {border2} !important;
+    transition:box-shadow .18s ease, transform .18s ease !important;
+}}
+[data-testid="stPlotlyChart"] > div:hover {{
+    box-shadow:{shadow_h} !important;
+    transform:translateY(-1px) !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stSidebar"] {{
+    display:flex !important; visibility:visible !important;
+    transform:translateX(0) !important; opacity:1 !important;
+    background:{side_bg} !important;
+    border-right:0.5px solid {side_bdr} !important;
+    min-width:230px !important;
+}}
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+button[aria-label="Open sidebar"],
+button[aria-label="Close sidebar"] {{
+    display:flex !important; visibility:visible !important;
+    opacity:1 !important; z-index:9999 !important;
+}}
+[data-testid="stSidebar"] * {{ color:{side_txt} !important; }}
+[data-testid="stSidebar"] label {{
+    color:{side_lbl} !important; font-size:.65rem !important;
+    text-transform:uppercase; letter-spacing:.09em; font-weight:600;
+}}
+[data-testid="stSidebar"] .stMarkdown p {{
+    color:{side_txt} !important; font-size:.82rem !important;
+}}
+[data-testid="stSidebar"] hr {{ border-color:{border} !important; opacity:1 !important; }}
+[data-testid="stSidebar"] .stButton button {{
+    background:{bg2} !important;
+    border:0.5px solid {border2} !important;
+    color:{ink2} !important; font-weight:600 !important;
+    border-radius:8px !important; transition:all .15s !important;
+}}
+[data-testid="stSidebar"] .stButton button[kind="primary"] {{
+    background:{accent} !important;
+    border:none !important; color:white !important;
+    box-shadow:0 2px 10px rgba(26,92,58,.28) !important;
+}}
+[data-testid="stSidebarCollapseButton"] svg {{
+    fill:{muted} !important; color:{muted} !important;
+}}
+[data-testid="stSidebarCollapsedControl"] button {{
+    background:{bg2} !important;
+    border:0.5px solid {border2} !important; border-radius:8px !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ABAS / TABS
+══════════════════════════════════════════════════════════════════════════ */
+.stTabs [data-baseweb="tab-list"] {{
+    background:{bg2} !important;
+    border-radius:10px !important; padding:3px !important;
+    gap:0 !important; flex-wrap:wrap !important; border:none !important;
+}}
+.stTabs [data-baseweb="tab"] {{
+    color:{muted} !important; border-radius:7px !important;
+    font-size:.78rem !important; font-weight:500 !important;
+    padding:6px 14px !important; white-space:nowrap !important;
+    transition:all .15s !important; max-width:200px !important;
+}}
+.stTabs [data-baseweb="tab"]:hover {{
+    background:{card} !important; color:{txt} !important;
+}}
+.stTabs [aria-selected="true"] {{
+    background:{card} !important; color:{txt} !important;
+    font-weight:600 !important;
+    box-shadow:{shadow} !important; border:none !important;
+}}
+.stTabs [data-baseweb="tab-panel"] {{
+    background:{bg} !important; padding:16px 0 !important;
+}}
+/* Abas principais (2 top-level) */
+.stTabs:first-of-type [data-baseweb="tab-list"] {{
+    background:transparent !important; border:none !important;
+    padding:0 0 0 2px !important; gap:4px !important;
+}}
+.stTabs:first-of-type [data-baseweb="tab"] {{
+    font-size:.86rem !important; font-weight:500 !important;
+    padding:8px 20px !important; border-radius:8px !important;
+    background:{card} !important;
+    border:0.5px solid {border2} !important; max-width:none !important;
+}}
+.stTabs:first-of-type [aria-selected="true"] {{
+    background:{accent} !important;
+    color:white !important; border:none !important;
+    box-shadow:0 2px 10px rgba(26,92,58,.28) !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DATAFRAMES
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stDataFrame"],[data-testid="stDataEditor"] {{
+    background:{card} !important; border-radius:12px !important;
+    overflow:hidden !important; box-shadow:{shadow} !important;
+    border:0.5px solid {border2} !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SEÇÕES E BADGES
+══════════════════════════════════════════════════════════════════════════ */
+.titulo-sec {{
+    font-size:.92rem; font-weight:600; color:{txt};
+    border-bottom:0.5px solid {border2};
+    padding-bottom:7px; margin:20px 0 12px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    letter-spacing:-.01em;
+}}
+.badge-sim {{
+    background:{_GREEN_L_LT}; color:{_GREEN};
+    padding:3px 10px; border-radius:100px;
+    font-weight:600; font-size:.72rem; display:inline-block;
+}}
+.badge-nao {{
+    background:{bg2}; color:{muted};
+    padding:3px 10px; border-radius:100px;
+    font-weight:600; font-size:.72rem; display:inline-block;
+    border:0.5px solid {border2};
+}}
+.periodo-badge {{
+    display:inline-flex; align-items:center; gap:5px;
+    background:{bg2}; color:{muted};
+    font-size:.72rem; font-weight:500;
+    padding:4px 12px; border-radius:100px;
+    border:0.5px solid {border2};
+}}
+.alerta-dev {{
+    background:#FFFBEB; border:0.5px solid #F59E0B;
+    border-left:4px solid #F59E0B;
+    border-radius:10px; padding:14px 18px;
+    font-size:.84rem; color:#92400E; margin:12px 0;
+}}
+.empty-state {{ text-align:center; padding:60px 20px; }}
+.empty-icon  {{ font-size:3rem; margin-bottom:12px; }}
+.empty-title {{ font-size:1rem; font-weight:600; color:{txt}; margin-bottom:6px; }}
+.empty-sub   {{ font-size:.84rem; color:{muted}; max-width:420px; margin:0 auto; }}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ST.METRIC
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stMetricValue"] > div,
+[data-testid="stMetricValue"] {{
+    font-family:'DM Mono',monospace !important;
+    white-space:normal !important; overflow:visible !important;
+    text-overflow:unset !important; word-break:break-word !important;
+    font-size:clamp(.82rem,1.8vw,1.22rem) !important;
+    font-weight:500 !important; color:{txt} !important;
+    letter-spacing:-0.02em !important;
+}}
+[data-testid="stMetricLabel"] > div,
+[data-testid="stMetricLabel"] {{
+    white-space:normal !important; overflow:visible !important;
+    font-size:clamp(.6rem,1.1vw,.72rem) !important;
+    font-weight:600 !important; text-transform:uppercase !important;
+    letter-spacing:.06em !important; color:{ink4} !important;
+    line-height:1.3 !important;
+}}
+[data-testid="stMetricDelta"] {{
+    font-size:.70rem !important; font-weight:500 !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TEXTO E INPUTS
+══════════════════════════════════════════════════════════════════════════ */
+h1,h2,h3,h4,h5,h6 {{ color:{txt} !important; }}
+h1,h2 {{
+    font-family:'DM Serif Display',Georgia,serif !important;
+    letter-spacing:-0.02em !important; font-weight:400 !important;
+}}
+.stMarkdown p,.stMarkdown li {{ color:{txt} !important; }}
+.stMarkdown code {{
+    background:{bg2} !important; color:{txt} !important;
+    padding:2px 7px; border-radius:5px; font-size:.84em;
+}}
+small,.stCaption,[data-testid="stCaptionContainer"] {{
+    color:{muted} !important; font-size:.77rem !important;
+}}
+hr {{ border-color:{border2} !important; opacity:.8 !important; }}
+[data-testid="stAlert"] {{ border-radius:10px !important; border-left-width:4px !important; }}
+[data-testid="stSelectbox"] > div > div {{
+    background:{input_bg} !important; border-color:{border2} !important;
+    color:{txt} !important; border-radius:8px !important;
+}}
+[data-testid="stRadio"] label {{ color:{txt} !important; font-size:.84rem !important; }}
+[data-testid="stSpinner"] {{ color:{accent} !important; }}
+
+/* ── Botão primary global ─────────────────────────────────────────────────── */
+.stButton button[kind="primary"] {{
+    background:{accent} !important; border:none !important;
+    color:white !important; font-weight:600 !important;
+    border-radius:8px !important; padding:7px 18px !important;
+    box-shadow:0 2px 10px rgba(26,92,58,.28) !important;
+    transition:all .18s ease !important;
+}}
+.stButton button[kind="primary"]:hover {{
+    background:{_GREEN_H} !important;
+    transform:translateY(-1px) !important;
+    box-shadow:0 4px 18px rgba(26,92,58,.38) !important;
+}}
+
+/* ── Ocultar chrome Streamlit ─────────────────────────────────────────────── */
+#MainMenu,footer,.stDeployButton,[data-testid="stToolbar"] {{
+    display:none !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVO
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width:1400px) {{
+    .kpi-hdr  {{ grid-template-columns:repeat(4,minmax(0,1fr)); }}
+    .kpi-grid {{ grid-template-columns:repeat(4,1fr); }}
+}}
+@media (max-width:900px) {{
+    .main .block-container > div:first-child {{ padding:.8rem !important; }}
+    .kpi-hdr  {{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }}
+    .kpi-grid {{ grid-template-columns:repeat(3,1fr); gap:8px; }}
+    .masthead {{ padding:10px 14px; height:auto; flex-wrap:wrap; gap:8px; }}
+    .stTabs [data-baseweb="tab"] {{ font-size:.72rem !important; padding:5px 10px !important; }}
+    [data-testid="stPlotlyChart"] > div {{ border-radius:8px !important; }}
+    .main [data-testid="stHorizontalBlock"] {{ flex-wrap:wrap !important; gap:8px !important; }}
+    .main [data-testid="stHorizontalBlock"] > div {{
+        min-width:calc(50% - 4px) !important;
+        flex:1 1 calc(50% - 4px) !important; max-width:100% !important;
+    }}
+}}
+@media (max-width:640px) {{
+    .main .block-container > div:first-child {{ padding:.4rem .5rem 1rem !important; }}
+    .kpi-hdr  {{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }}
+    .kpi-grid {{ grid-template-columns:repeat(2,1fr); gap:6px; }}
+    .kha-card,.kpi-card {{ padding:10px 10px 8px; }}
+    .kha-value {{ font-size:13px; }}
+    .masthead {{ padding:10px 12px; border-radius:10px; height:auto; flex-wrap:wrap; gap:6px; }}
+    .masthead-right {{ gap:5px; flex-wrap:wrap; }}
+    .masthead-pill {{ font-size:.62rem; padding:3px 8px; }}
+    [data-testid="stPlotlyChart"] > div {{ border-radius:8px !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ flex-wrap:wrap !important; }}
+    .stTabs [data-baseweb="tab"] {{ font-size:.68rem !important; padding:5px 8px !important; }}
+    .stTabs:first-of-type [data-baseweb="tab"] {{ font-size:.74rem !important; padding:7px 10px !important; }}
+    .main [data-testid="stHorizontalBlock"] {{ flex-wrap:wrap !important; gap:6px !important; }}
+    .main [data-testid="stHorizontalBlock"] > div {{
+        min-width:100% !important; flex:1 1 100% !important; max-width:100% !important;
+    }}
+    .titulo-sec {{ font-size:.85rem; white-space:normal; }}
+}}
+
+{_dark_chart}
+</style>
+"""
+
+
+def aplicar_css(dark: bool = False) -> None:
+    st.markdown(_css(dark), unsafe_allow_html=True)
