@@ -2,7 +2,7 @@
 app.py — Painel Executivo · BI GRUPO AGORA MAKERS
 Executa com: streamlit run app.py
 """
-# streamlit run "C:\Users\marcos.teixeira\Desktop\BI DEFINITIVO\painel_executivo\app.py"
+# streamlit run "C:\Users\marcos.teixeira\Desktop\BI DEFINITIVO\painel_executivo\BI-AGORA_MAKERS\app.py"
 
 import streamlit as st
 import pandas as pd
