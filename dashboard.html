@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI · Agora Makers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════
+   TOKENS & RESET
+══════════════════════════════════════════════════ */
+:root {
+  --bg:          #F5F3EE;
+  --bg2:         #EDEAE2;
+  --surface:     #FFFFFF;
+  --surface2:    #FAFAF7;
+  --border:      #E2DDD5;
+  --border2:     #D4CFC6;
+  --text:        #1A1714;
+  --text2:       #6B6560;
+  --text3:       #9B9590;
+  --accent:      #1A6BF5;
+  --accent2:     #0D4DB8;
+  --green:       #10B981;
+  --red:         #EF4444;
+  --amber:       #F59E0B;
+  --purple:      #8B5CF6;
+  --omp:         #1A6BF5;
+  --mtc:         #10B981;
+  --radius:      12px;
+  --radius-lg:   18px;
+  --shadow:      0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:   0 4px 16px rgba(0,0,0,.08), 0 12px 40px rgba(0,0,0,.06);
+  --font-head:   'Syne', system-ui, sans-serif;
+  --font-body:   'DM Sans', system-ui, sans-serif;
+  --api:         'http://localhost:5000';
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ══════════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════════ */
+#topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,243,238,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex; align-items: center; gap: 20px;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.tb-logo {
+  width: 32px; height: 32px;
+  background: var(--text);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tb-logo svg { display: block; }
+.tb-title {
+  font-family: var(--font-head);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -.01em;
+}
+.tb-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.tb-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+.tb-spacer { flex: 1; }
+
+/* Live indicator */
+.tb-live {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500;
+  color: var(--green);
+  background: rgba(16,185,129,.08);
+  padding: 4px 10px; border-radius: 99px;
+}
+.tb-live-dot {
+  width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+/* Status badge */
+#status-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 99px;
+  background: rgba(239,68,68,.1); color: var(--red);
+  transition: all .3s;
+}
+#status-badge.ok { background: rgba(16,185,129,.1); color: var(--green); }
+#status-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Refresh btn */
+.tb-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 500; font-family: var(--font-body);
+  color: var(--text2); cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+}
+.tb-btn:hover { background: var(--bg2); border-color: var(--border2); color: var(--text); }
+.tb-btn.spinning svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════
+   FILTERS BAR
+══════════════════════════════════════════════════ */
+#filterbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+}
+.fb-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text3);
+}
+.fb-group { display: flex; align-items: center; gap: 6px; }
+.fb-input {
+  height: 32px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface2); color: var(--text);
+  font-size: 13px; font-family: var(--font-body);
+  outline: none; transition: border-color .2s;
+}
+.fb-input:focus { border-color: var(--accent); }
+.fb-select { appearance: none; padding-right: 28px; cursor: pointer; }
+.fb-toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.fb-toggle {
+  position: relative; width: 36px; height: 20px; cursor: pointer;
+}
+.fb-toggle input { opacity: 0; width: 0; height: 0; }
+.fb-toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--border2); border-radius: 99px; transition: .2s;
+}
+.fb-toggle-slider::before {
+  content: ''; position: absolute;
+  height: 14px; width: 14px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: .2s;
+}
+.fb-toggle input:checked + .fb-toggle-slider { background: var(--accent); }
+.fb-toggle input:checked + .fb-toggle-slider::before { transform: translateX(16px); }
+.fb-toggle-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+
+.apply-btn {
+  height: 32px; padding: 0 14px;
+  background: var(--accent); color: white;
+  border: none; border-radius: 8px;
+  font-size: 12px; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; transition: background .2s;
+}
+.apply-btn:hover { background: var(--accent2); }
+
+/* ══════════════════════════════════════════════════
+   KPI ROW
+══════════════════════════════════════════════════ */
+#kpi-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px; padding: 20px 24px 12px;
+}
+@media (max-width: 1200px) { #kpi-row { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 700px)  { #kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+  animation: fadeUp .4s ease both;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+.kpi-label {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text3); margin-bottom: 8px;
+}
+.kpi-value {
+  font-family: var(--font-head);
+  font-size: 20px; font-weight: 700; line-height: 1;
+  margin-bottom: 4px; letter-spacing: -.02em;
+}
+.kpi-sub {
+  font-size: 11px; color: var(--text3);
+}
+.kpi-sub.up   { color: var(--green); }
+.kpi-sub.down { color: var(--red);   }
+
+/* Skeleton loader */
+.skel {
+  background: linear-gradient(90deg, var(--bg2) 25%, var(--bg) 50%, var(--bg2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 20px; width: 80%;
+}
+.skel.sm { height: 12px; width: 50%; margin-top: 6px; }
+@keyframes shimmer { 0%{background-position: 200% 0} 100%{background-position: -200% 0} }
+
+/* ══════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════ */
+#tabs-nav {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+}
+.tab-btn {
+  height: 44px; padding: 0 18px;
+  font-size: 13px; font-weight: 500; font-family: var(--font-body);
+  color: var(--text3); background: transparent; border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+  position: relative; top: 1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--accent); font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+.tab-pane { display: none; padding: 20px 24px; }
+.tab-pane.active { display: block; }
+
+/* ══════════════════════════════════════════════════
+   SECTIONS & CARDS
+══════════════════════════════════════════════════ */
+.section-title {
+  font-family: var(--font-head);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: -.01em; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before {
+  content: ''; display: block;
+  width: 3px; height: 16px;
+  background: var(--accent); border-radius: 2px;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  padding: 20px; overflow: hidden;
+}
+.card-title {
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text3); margin-bottom: 14px;
+}
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.col-6 { flex: 1 1 calc(50% - 7px); min-width: 300px; }
+.col-4 { flex: 1 1 calc(33.33% - 10px); min-width: 260px; }
+.col-3 { flex: 1 1 calc(25% - 11px); min-width: 220px; }
+.col-12 { flex: 1 1 100%; }
+.mb-14 { margin-bottom: 14px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* Company switcher inside tabs */
+.co-switcher {
+  display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.co-btn {
+  height: 30px; padding: 0 14px; border-radius: 99px;
+  border: 1.5px solid var(--border); background: transparent;
+  font-size: 12px; font-weight: 600; font-family: var(--font-body);
+  color: var(--text2); cursor: pointer; transition: all .2s;
+}
+.co-btn:hover { border-color: var(--border2); color: var(--text); }
+.co-btn.active-omp { border-color: var(--omp); background: rgba(26,107,245,.08); color: var(--omp); }
+.co-btn.active-mtc { border-color: var(--mtc); background: rgba(16,185,129,.08); color: var(--mtc); }
+.co-btn.active-cons { border-color: var(--text); background: rgba(26,23,20,.06); color: var(--text); }
+
+/* ══════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════ */
+.bi-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.bi-table th {
+  text-align: left; padding: 9px 12px;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text3); border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+.bi-table th.r, .bi-table td.r { text-align: right; }
+.bi-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.bi-table tr:last-child td { border-bottom: none; }
+.bi-table tr:hover td { background: var(--surface2); }
+.bi-table .bar-cell { position: relative; }
+.bi-bar {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: rgba(26,107,245,.08); pointer-events: none;
+}
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-green  { background: rgba(16,185,129,.12); color: #059669; }
+.badge-amber  { background: rgba(245,158,11,.12);  color: #B45309; }
+.badge-red    { background: rgba(239,68,68,.12);   color: #DC2626; }
+.badge-blue   { background: rgba(26,107,245,.12);  color: #1A6BF5; }
+
+/* ══════════════════════════════════════════════════
+   METAS BARS
+══════════════════════════════════════════════════ */
+.metas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+.meta-row {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.meta-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.meta-mes  { font-size: 12px; font-weight: 700; font-family: var(--font-head); }
+.meta-pct  { font-size: 12px; font-weight: 700; }
+.meta-track { height: 6px; background: var(--bg2); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+.meta-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.meta-vals  { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); }
+
+/* ══════════════════════════════════════════════════
+   EMPRESA HEADER CHIPS
+══════════════════════════════════════════════════ */
+.empresa-chips { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.echip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.echip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.echip-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); }
+.echip-value { font-size: 16px; font-weight: 700; font-family: var(--font-head); }
+.echip-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+/* ══════════════════════════════════════════════════
+   LOADING / ERROR STATES
+══════════════════════════════════════════════════ */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px;
+  padding: 40px 20px; color: var(--text3); font-size: 13px;
+}
+.spinner {
+  width: 24px; height: 24px; border: 2.5px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.error-state {
+  background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 10px; padding: 14px 16px;
+  color: #DC2626; font-size: 13px; margin: 10px 0;
+}
+
+/* ══════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════ */
+footer {
+  text-align: center; padding: 20px 24px;
+  font-size: 11px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: 24px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ TOPBAR ═══════════════════════════ -->
+<div id="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+        <rect x="2" y="2" width="8" height="8" rx="2" fill="white" opacity=".9"/>
+        <rect x="14" y="2" width="8" height="8" rx="2" fill="white" opacity=".55"/>
+        <rect x="2" y="14" width="8" height="8" rx="2" fill="white" opacity=".55"/>
+        <rect x="14" y="14" width="8" height="8" rx="2" fill="#5CB88A" opacity=".9"/>
+      </svg>
+    </div>
+    <div>
+      <div class="tb-title">Agora Makers</div>
+      <div class="tb-sub">BI Executivo</div>
+    </div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-live"><div class="tb-live-dot"></div>ao vivo</div>
+  <div id="status-badge"><div id="status-badge-dot"></div><span id="status-text">Conectando…</span></div>
+  <div class="tb-spacer"></div>
+  <div id="last-update" style="font-size:11px;color:var(--text3);white-space:nowrap;"></div>
+  <button class="tb-btn" id="refresh-btn" onclick="refreshAll()">
+    <svg id="refresh-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M13.5 8A5.5 5.5 0 1 1 3.2 4.7M3 2v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Atualizar
+  </button>
+</div>
+
+<!-- ═══════════════════════════ FILTERS ═══════════════════════════ -->
+<div id="filterbar">
+  <span class="fb-label">Filtros</span>
+  <div class="fb-group">
+    <input type="date" class="fb-input" id="f-start" />
+    <span style="color:var(--text3);font-size:12px;">até</span>
+    <input type="date" class="fb-input" id="f-end" />
+  </div>
+  <div class="fb-sep" style="width:1px;height:20px;background:var(--border);"></div>
+  <div class="fb-toggle-wrap">
+    <label class="fb-toggle">
+      <input type="checkbox" id="f-ic" />
+      <span class="fb-toggle-slider"></span>
+    </label>
+    <span class="fb-toggle-label">Intercompany</span>
+  </div>
+  <button class="apply-btn" onclick="applyFilters()">Aplicar</button>
+</div>
+
+<!-- ═══════════════════════════ KPI ROW ═══════════════════════════ -->
+<div id="kpi-row">
+  <div class="kpi-card" id="kpi-rb">
+    <div class="kpi-label">💰 Receita Bruta</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-imp">
+    <div class="kpi-label">🧾 Impostos</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-rl">
+    <div class="kpi-label">📈 Rec. Líquida</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-cpv">
+    <div class="kpi-label">🔧 CPV</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-mg">
+    <div class="kpi-label">✅ Margem</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-nf">
+    <div class="kpi-label">📄 Notas Fiscais</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+  <div class="kpi-card" id="kpi-cli">
+    <div class="kpi-label">👥 Clientes</div>
+    <div class="skel"></div><div class="skel sm"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TABS ═══════════════════════════ -->
+<div id="tabs-nav">
+  <button class="tab-btn active" onclick="switchTab('dashboard')">◈ Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('faturamento')">📊 Faturamento</button>
+  <button class="tab-btn" onclick="switchTab('pedidos')">📋 Pedidos</button>
+  <button class="tab-btn" onclick="switchTab('devolucoes')">↩️ Devoluções</button>
+  <button class="tab-btn" onclick="switchTab('metas')">🎯 Metas</button>
+</div>
+
+<!-- ═══════════════════ TAB: DASHBOARD ════════════════════════ -->
+<div id="tab-dashboard" class="tab-pane active">
+  <div class="row mb-14">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">📊 Faturamento Mensal + Média Móvel 3M (Consolidado)</div>
+        <div id="chart-mensal-cons" style="height:300px;"></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">🥧 Composição da Receita</div>
+        <div id="chart-composicao" style="height:300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-14">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">📦 Top Famílias de Produto</div>
+        <div id="chart-familias-dash" style="height:320px;"></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">🗺️ Faturamento por Estado</div>
+        <div id="chart-estados-dash" style="height:320px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-title">🏆 Top 15 Clientes · Consolidado</div>
+        <div id="table-clientes-dash"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB: FATURAMENTO ════════════════════════ -->
+<div id="tab-faturamento" class="tab-pane">
+  <div class="co-switcher">
+    <button class="co-btn active-cons" id="fat-co-cons" onclick="setFatEmpresa('consolidado')">📊 Consolidado</button>
+    <button class="co-btn" id="fat-co-omp" onclick="setFatEmpresa('omp')">🏙️ My City</button>
+    <button class="co-btn" id="fat-co-mtc" onclick="setFatEmpresa('mtc')">⚙️ Metalco</button>
+  </div>
+  <div class="row mb-14">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title" id="fat-title-mensal">📊 Faturamento Mensal</div>
+        <div id="chart-fat-mensal" style="height:300px;"></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">📦 Famílias de Produto</div>
+        <div id="chart-fat-familias" style="height:300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-14">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">🗂️ Grupos de Itens</div>
+        <div id="chart-fat-grupos" style="height:300px;"></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">📍 Faturamento por Estado</div>
+        <div id="chart-fat-estados" style="height:300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-title">🏆 Top Clientes</div>
+        <div id="table-fat-clientes"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB: PEDIDOS ════════════════════════ -->
+<div id="tab-pedidos" class="tab-pane">
+  <div class="co-switcher">
+    <button class="co-btn active-cons" id="ped-co-cons" onclick="setPedEmpresa('consolidado')">📊 Consolidado</button>
+    <button class="co-btn" id="ped-co-omp" onclick="setPedEmpresa('omp')">🏙️ My City</button>
+    <button class="co-btn" id="ped-co-mtc" onclick="setPedEmpresa('mtc')">⚙️ Metalco</button>
+  </div>
+  <div id="ped-kpis" class="empresa-chips mb-20"></div>
+  <div class="row mb-14">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-title">📋 Pedidos por Mês</div>
+        <div id="chart-ped-mensal" style="height:300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB: DEVOLUÇÕES ════════════════════════ -->
+<div id="tab-devolucoes" class="tab-pane">
+  <div id="dev-kpis" class="empresa-chips mb-20"></div>
+  <div class="card">
+    <div class="card-title">ℹ️ Devoluções</div>
+    <p style="color:var(--text3);font-size:13px;line-height:1.7;">
+      As devoluções são carregadas a partir dos arquivos <strong>esc002omp.csv</strong> e <strong>esc002mtc.csv</strong>.<br>
+      Os KPIs acima mostram o total de notas de devolução e o valor bruto no período selecionado.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB: METAS ════════════════════════ -->
+<div id="tab-metas" class="tab-pane">
+  <div class="row mb-14">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">🏙️ My City — Metas vs Realizado</div>
+        <div id="chart-metas-omp" style="height:280px;"></div>
+        <div id="metas-grid-omp" class="metas-grid" style="margin-top:14px;"></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-title">⚙️ Metalco — Metas vs Realizado</div>
+        <div id="chart-metas-mtc" style="height:280px;"></div>
+        <div id="metas-grid-mtc" class="metas-grid" style="margin-top:14px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  BI Agora Makers · Painel Executivo &nbsp;·&nbsp; API: <code id="api-url-footer">http://localhost:5000</code>
+</footer>
+
+<!-- ═══════════════════════ SCRIPTS ══════════════════════════ -->
+<script>
+/* ── Config ─────────────────────────────────────── */
+// ⚠️ Altere API_BASE para o endereço real do servidor quando em produção
+// Exemplos:
+//   http://192.168.1.100:5000   (rede local pelo IP)
+//   https://seu-tunel.ngrok.io   (ngrok / cloudflare tunnel)
+const API_BASE = 'http://localhost:5000';
+
+document.getElementById('api-url-footer').textContent = API_BASE;
+
+/* ── State ──────────────────────────────────────── */
+let state = {
+  start: null,
+  end:   null,
+  ic:    'NAO',
+  fatEmpresa: 'consolidado',
+  pedEmpresa: 'consolidado',
+};
+
+/* ── Helpers ────────────────────────────────────── */
+const brl = v => {
+  if (v == null) return '—';
+  const a = Math.abs(v);
+  if (a >= 1e6)  return `R$ ${(v/1e6).toFixed(2)}M`;
+  if (a >= 1e3)  return `R$ ${(v/1e3).toFixed(0)}K`;
+  return `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0})}`;
+};
+const n = v => v == null ? '—' : v.toLocaleString('pt-BR');
+const pct = v => v == null ? '—' : `${v.toFixed(1)}%`;
+
+async function apiFetch(path) {
+  const params = new URLSearchParams();
+  if (state.start) params.set('start', state.start);
+  if (state.end)   params.set('end',   state.end);
+  params.set('ic', state.ic);
+  const url = `${API_BASE}${path}?${params}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+const plotCfg = {
+  displayModeBar: false,
+  responsive: true,
+  locale: 'pt-BR',
+};
+const layout0 = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor:  'rgba(0,0,0,0)',
+  font: { family: 'DM Sans, system-ui, sans-serif', size: 11, color: '#6B6560' },
+  margin: { l:12, r:12, t:36, b:12 },
+  hoverlabel: { bgcolor: '#FFFFFF', bordercolor: '#E2DDD5', font: { size:12 } },
+  xaxis: { gridcolor: '#EDE8E0', linecolor: '#E2DDD5', automargin: true, tickangle: -30 },
+  yaxis: { gridcolor: '#EDE8E0', linecolor: '#E2DDD5', automargin: true },
+};
+
+/* ── Tab Switching ──────────────────────────────── */
+let activeTab = 'dashboard';
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['dashboard','faturamento','pedidos','devolucoes','metas'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  activeTab = tab;
+  // lazy-load tab content
+  if (tab === 'faturamento')  loadFaturamento();
+  if (tab === 'pedidos')      loadPedidos();
+  if (tab === 'devolucoes')   loadDevolucoes();
+  if (tab === 'metas')        loadMetas();
+}
+
+/* ── Company buttons ────────────────────────────── */
+function setFatEmpresa(e) {
+  state.fatEmpresa = e;
+  ['cons','omp','mtc'].forEach(k => {
+    const btn = document.getElementById(`fat-co-${k}`);
+    btn.className = 'co-btn';
+    if (k === e || (k === 'cons' && e === 'consolidado')) btn.classList.add(`active-${k === 'cons' ? 'cons' : k}`);
+  });
+  if (e === 'consolidado') document.getElementById('fat-co-cons').classList.add('active-cons');
+  loadFaturamento();
+}
+function setPedEmpresa(e) {
+  state.pedEmpresa = e;
+  ['cons','omp','mtc'].forEach(k => {
+    const btn = document.getElementById(`ped-co-${k}`);
+    btn.className = 'co-btn';
+  });
+  const map = {consolidado:'cons', omp:'omp', mtc:'mtc'};
+  document.getElementById(`ped-co-${map[e]}`).classList.add(`active-${map[e] === 'cons' ? 'cons' : map[e]}`);
+  loadPedidos();
+}
+
+/* ── Filters ────────────────────────────────────── */
+function applyFilters() {
+  state.start = document.getElementById('f-start').value || null;
+  state.end   = document.getElementById('f-end').value   || null;
+  state.ic    = document.getElementById('f-ic').checked ? 'SIM' : 'NAO';
+  refreshAll();
+}
+
+/* ── Status Check ───────────────────────────────── */
+async function checkStatus() {
+  try {
+    const d = await fetch(`${API_BASE}/api/status`);
+    const j = await d.json();
+    const badge = document.getElementById('status-badge');
+    const text  = document.getElementById('status-text');
+    if (j.ok) {
+      badge.className = 'ok';
+      text.textContent = 'API Conectada';
+    } else {
+      badge.className = '';
+      text.textContent = 'Dados Indisponíveis';
+    }
+  } catch {
+    document.getElementById('status-badge').className = '';
+    document.getElementById('status-text').textContent = 'API Offline';
+  }
+}
+
+/* ── KPIs ───────────────────────────────────────── */
+async function loadKpis() {
+  try {
+    const d = await apiFetch('/api/kpis');
+    const cards = {
+      'kpi-rb':  [`💰 Receita Bruta`,  brl(d.rb),    ''],
+      'kpi-imp': [`🧾 Impostos`,       brl(d.impostos), `${pct(d.imp_pct)} da RB`],
+      'kpi-rl':  [`📈 Rec. Líquida`,   brl(d.rl),    ''],
+      'kpi-cpv': [`🔧 CPV`,            brl(d.cpv),   `${pct(d.cpv_pct)} da RL`],
+      'kpi-mg':  [`✅ Margem`,         brl(d.margem),`${pct(d.margem_pct)}`],
+      'kpi-nf':  [`📄 Notas Fiscais`,  n(d.notas),   'emitidas'],
+      'kpi-cli': [`👥 Clientes`,       n(d.clientes),'únicos · período'],
+    };
+    for (const [id, [label, val, sub]] of Object.entries(cards)) {
+      const el = document.getElementById(id);
+      const mgNum = parseFloat(d.margem_pct);
+      const cls = id === 'kpi-mg' ? (mgNum >= 25 ? 'up' : mgNum >= 10 ? '' : 'down') : '';
+      el.innerHTML = `
+        <div class="kpi-label">${label}</div>
+        <div class="kpi-value">${val}</div>
+        ${sub ? `<div class="kpi-sub ${cls}">${sub}</div>` : ''}
+      `;
+    }
+  } catch(e) {
+    console.error('KPIs:', e);
+  }
+}
+
+/* ── Dashboard Charts ───────────────────────────── */
+async function loadDashboard() {
+  try {
+    const [mensal, familias, estados, clientes, kpiDash] = await Promise.all([
+      apiFetch('/api/faturamento/mensal'),
+      apiFetch('/api/faturamento/familias'),
+      apiFetch('/api/faturamento/estados'),
+      apiFetch('/api/faturamento/top-clientes'),
+      apiFetch('/api/kpis'),
+    ]);
+
+    // Faturamento Mensal
+    const ma3 = mensal.map((_, i) => {
+      const slice = mensal.slice(Math.max(0,i-2), i+1);
+      return slice.reduce((s,r) => s + r.rb, 0) / slice.length;
+    });
+    Plotly.newPlot('chart-mensal-cons', [
+      {
+        type:'bar', name:'Faturamento',
+        x: mensal.map(r => r.mes), y: mensal.map(r => r.rb),
+        marker: { color: '#1A6BF5', opacity: .8 },
+        hovertemplate: '<b>%{x}</b><br>R$ %{y:,.0f}<extra></extra>',
+      },
+      {
+        type:'scatter', name:'Média 3M', mode:'lines',
+        x: mensal.map(r => r.mes), y: ma3,
+        line: { color:'#F59E0B', width:2.5, dash:'dot' },
+        hovertemplate: '<b>%{x}</b><br>Média: R$ %{y:,.0f}<extra></extra>',
+      }
+    ], { ...layout0, barmode:'overlay', height:300,
+      yaxis: { ...layout0.yaxis, tickprefix:'R$ ', tickformat:',.0f' },
+      legend: { orientation:'h', y:1.08, x:1, xanchor:'right', font:{size:11} },
+    }, plotCfg);
+
+    // Composição Donut
+    Plotly.newPlot('chart-composicao', [{
+      type:'pie', hole:.6,
+      labels:['Margem','CPV','Impostos'],
+      values:[Math.max(kpiDash.margem,0), Math.max(kpiDash.cpv,0), Math.max(kpiDash.impostos,0)],
+      marker: { colors:['#10B981','#8B5CF6','#F59E0B'], line:{color:'white',width:2} },
+      textposition:'outside', textfont:{size:10},
+      hovertemplate:'<b>%{label}</b><br>R$ %{value:,.0f}<br>%{percent}<extra></extra>',
+    }], {
+      ...layout0, height:300,
+      annotations:[{
+        text:`<b>${brl(kpiDash.rb)}</b><br>Rec. Bruta`,
+        x:.5, y:.5, showarrow:false,
+        font:{size:13, color:'#1A1714', family:'Syne'},
+        xanchor:'center', yanchor:'middle',
+      }],
+      legend:{ orientation:'h', y:-0.08, x:.5, xanchor:'center', font:{size:11} },
+      showlegend: true,
+    }, plotCfg);
+
+    // Famílias horizontal bar
+    Plotly.newPlot('chart-familias-dash', [{
+      type:'bar', orientation:'h',
+      x: familias.map(r => r.rb),
+      y: familias.map(r => r.familia),
+      marker: { color:'#1A6BF5', opacity:.8 },
+      hovertemplate: '<b>%{y}</b><br>R$ %{x:,.0f}<extra></extra>',
+    }], {
+      ...layout0, height:320,
+      xaxis:{...layout0.xaxis, tickprefix:'R$ ', tickformat:',.0f', tickangle:0},
+      yaxis:{...layout0.yaxis, autorange:'reversed', tickangle:0},
+      margin:{l:140, r:12, t:10, b:40},
+    }, plotCfg);
+
+    // Estados bar chart
+    const top10est = estados.slice(0,10);
+    Plotly.newPlot('chart-estados-dash', [{
+      type:'bar', orientation:'h',
+      x: top10est.map(r => r.rb),
+      y: top10est.map(r => r.estado),
+      marker: { color:'#10B981', opacity:.8 },
+      hovertemplate:'<b>%{y}</b><br>R$ %{x:,.0f}<extra></extra>',
+    }], {
+      ...layout0, height:320,
+      xaxis:{...layout0.xaxis, tickprefix:'R$ ', tickformat:',.0f', tickangle:0},
+      yaxis:{...layout0.yaxis, autorange:'reversed'},
+      margin:{l:100, r:12, t:10, b:40},
+    }, plotCfg);
+
+    // Table clientes
+    renderClientesTable('table-clientes-dash', clientes);
+
+  } catch(e) { console.error('Dashboard:', e); }
+}
+
+/* ── Faturamento Tab ────────────────────────────── */
+async function loadFaturamento() {
+  const emp = state.fatEmpresa;
+  document.getElementById('fat-title-mensal').textContent = `📊 Faturamento Mensal · ${emp === 'consolidado' ? 'Consolidado' : emp === 'omp' ? 'My City' : 'Metalco'}`;
+
+  try {
+    const [mensal, familias, grupos, estados, clientes] = await Promise.all([
+      apiFetch(`/api/faturamento/mensal&empresa=${emp}`).catch(() => apiFetch('/api/faturamento/mensal')),
+      apiFetch(`/api/faturamento/familias`),
+      apiFetch(`/api/faturamento/grupos`),
+      apiFetch(`/api/faturamento/estados`),
+      apiFetch(`/api/faturamento/top-clientes`),
+    ]);
+
+    const color = emp === 'omp' ? '#1A6BF5' : emp === 'mtc' ? '#10B981' : '#6366F1';
+
+    // Mensal com RL overlay
+    Plotly.newPlot('chart-fat-mensal', [
+      {
+        type:'bar', name:'Rec. Bruta',
+        x: mensal.map(r=>r.mes), y: mensal.map(r=>r.rb),
+        marker:{color:color, opacity:.7},
+        hovertemplate:'<b>%{x}</b><br>RB: R$ %{y:,.0f}<extra></extra>',
+      },
+      {
+        type:'scatter', name:'Rec. Líquida', mode:'lines+markers',
+        x: mensal.map(r=>r.mes), y: mensal.map(r=>r.rl),
+        line:{color:'#F59E0B', width:2},
+        hovertemplate:'<b>%{x}</b><br>RL: R$ %{y:,.0f}<extra></extra>',
+      }
+    ], {
+      ...layout0, height:300, barmode:'overlay',
+      yaxis:{...layout0.yaxis, tickprefix:'R$ ', tickformat:',.0f'},
+      legend:{orientation:'h', y:1.08, x:1, xanchor:'right', font:{size:11}},
+    }, plotCfg);
+
+    // Famílias
+    Plotly.newPlot('chart-fat-familias', [{
+      type:'bar', orientation:'h',
+      x:familias.map(r=>r.rb), y:familias.map(r=>r.familia),
+      marker:{color:color, opacity:.8},
+      hovertemplate:'<b>%{y}</b><br>R$ %{x:,.0f} · %{customdata:.1f}%<extra></extra>',
+      customdata: familias.map(r=>r.pct),
+    }], {
+      ...layout0, height:300,
+      xaxis:{...layout0.xaxis, tickprefix:'R$ ', tickformat:',.0f', tickangle:0},
+      yaxis:{...layout0.yaxis, autorange:'reversed'},
+      margin:{l:150, r:12, t:10, b:40},
+    }, plotCfg);
+
+    // Grupos treemap style (bar)
+    Plotly.newPlot('chart-fat-grupos', [{
+      type:'bar',
+      x:grupos.map(r=>r.grupo), y:grupos.map(r=>r.rb),
+      marker:{color:grupos.map((_,i)=>`hsl(${210+i*15},70%,${55-i*2}%)`), opacity:.85},
+      hovertemplate:'<b>%{x}</b><br>R$ %{y:,.0f}<extra></extra>',
+    }], {
+      ...layout0, height:300,
+      yaxis:{...layout0.yaxis, tickprefix:'R$ ', tickformat:',.0f'},
+      xaxis:{...layout0.xaxis, tickangle:-30},
+    }, plotCfg);
+
+    // Estados
+    const top12est = estados.slice(0,12);
+    Plotly.newPlot('chart-fat-estados', [{
+      type:'bar', orientation:'h',
+      x:top12est.map(r=>r.rb), y:top12est.map(r=>r.estado),
+      marker:{color:color, opacity:.7},
+      hovertemplate:'<b>%{y}</b><br>R$ %{x:,.0f}<extra></extra>',
+    }], {
+      ...layout0, height:300,
+      xaxis:{...layout0.xaxis, tickprefix:'R$ ', tickformat:',.0f', tickangle:0},
+      yaxis:{...layout0.yaxis, autorange:'reversed'},
+      margin:{l:90, r:12, t:10, b:40},
+    }, plotCfg);
+
+    renderClientesTable('table-fat-clientes', clientes);
+
+  } catch(e) { console.error('Faturamento:', e); }
+}
+
+/* ── Pedidos Tab ────────────────────────────────── */
+async function loadPedidos() {
+  try {
+    const [resumo, mensal] = await Promise.all([
+      fetch(`${API_BASE}/api/pedidos/resumo?ic=${state.ic}&empresa=${state.pedEmpresa}${state.start?'&start='+state.start:''}${state.end?'&end='+state.end:''}`).then(r=>r.json()),
+      fetch(`${API_BASE}/api/pedidos/mensal?ic=${state.ic}&empresa=${state.pedEmpresa}${state.start?'&start='+state.start:''}${state.end?'&end='+state.end:''}`).then(r=>r.json()),
+    ]);
+
+    document.getElementById('ped-kpis').innerHTML = `
+      <div class="echip">
+        <div>
+          <div class="echip-label">Pedidos</div>
+          <div class="echip-value">${n(resumo.total_pedidos)}</div>
+        </div>
+      </div>
+      <div class="echip">
+        <div>
+          <div class="echip-label">Valor de Venda</div>
+          <div class="echip-value">${brl(resumo.valor_venda)}</div>
+        </div>
+      </div>
+      <div class="echip">
+        <div>
+          <div class="echip-label">Clientes</div>
+          <div class="echip-value">${n(resumo.clientes)}</div>
+        </div>
+      </div>
+      <div class="echip">
+        <div>
+          <div class="echip-label">Novos Clientes</div>
+          <div class="echip-value">${(resumo.novos_clientes||0).toFixed(1)}</div>
+        </div>
+      </div>
+    `;
+
+    Plotly.newPlot('chart-ped-mensal', [
+      {
+        type:'bar', name:'Valor de Venda',
+        x:mensal.map(r=>r.mes), y:mensal.map(r=>r.valor),
+        marker:{color:'#8B5CF6', opacity:.8},
+        hovertemplate:'<b>%{x}</b><br>R$ %{y:,.0f}<extra></extra>',
+      }
+    ], {
+      ...layout0, height:300,
+      yaxis:{...layout0.yaxis, tickprefix:'R$ ', tickformat:',.0f'},
+    }, plotCfg);
+
+  } catch(e) { console.error('Pedidos:', e); }
+}
+
+/* ── Devoluções Tab ─────────────────────────────── */
+async function loadDevolucoes() {
+  try {
+    const resumo = await fetch(`${API_BASE}/api/devolucoes/resumo?${state.start?'start='+state.start+'&':''}${state.end?'end='+state.end:''}`)
+      .then(r=>r.json());
+    document.getElementById('dev-kpis').innerHTML = `
+      <div class="echip">
+        <div>
+          <div class="echip-label">Notas de Devolução</div>
+          <div class="echip-value">${n(resumo.total_notas)}</div>
+        </div>
+      </div>
+      <div class="echip">
+        <div>
+          <div class="echip-label">Valor Total</div>
+          <div class="echip-value">${brl(resumo.valor_total)}</div>
+        </div>
+      </div>
+      <div class="echip">
+        <div>
+          <div class="echip-label">Clientes</div>
+          <div class="echip-value">${n(resumo.clientes)}</div>
+        </div>
+      </div>
+    `;
+  } catch(e) { console.error('Devoluções:', e); }
+}
+
+/* ── Metas Tab ──────────────────────────────────── */
+async function loadMetas() {
+  try {
+    const data = await fetch(`${API_BASE}/api/metas?ic=${state.ic}`).then(r=>r.json());
+
+    for (const [key, nome_chart, chart_id, grid_id] of [
+      ['omp', 'My City',  'chart-metas-omp', 'metas-grid-omp'],
+      ['mtc', 'Metalco',  'chart-metas-mtc', 'metas-grid-mtc'],
+    ]) {
+      const emp = data[key];
+      if (!emp) continue;
+      const meses = emp.meses;
+
+      const cores = meses.map(m => m.ating >= 100 ? '#10B981' : m.ating >= 70 ? '#F59E0B' : '#EF4444');
+
+      Plotly.newPlot(chart_id, [
+        {
+          type:'bar', name:'Meta',
+          x:meses.map(m=>m.mes), y:meses.map(m=>m.meta),
+          marker:{color:'#CBD5E1', opacity:.7},
+          hovertemplate:'<b>%{x}</b><br>Meta: R$ %{y:,.0f}<extra></extra>',
+        },
+        {
+          type:'bar', name:'Realizado',
+          x:meses.map(m=>m.mes), y:meses.map(m=>m.real),
+          marker:{color:cores, opacity:.85},
+          hovertemplate:'<b>%{x}</b><br>Realizado: R$ %{y:,.0f} (%{customdata:.1f}%)<extra></extra>',
+          customdata: meses.map(m=>m.ating),
+        }
+      ], {
+        ...layout0, height:280, barmode:'overlay',
+        yaxis:{...layout0.yaxis, tickprefix:'R$ ', tickformat:',.0f'},
+        legend:{orientation:'h', y:1.1, x:1, xanchor:'right', font:{size:11}},
+        annotations:[{
+          x:0.5, y:1.12, xref:'paper', yref:'paper', showarrow:false,
+          text: `Anual: ${brl(emp.real_anual)} / ${brl(emp.meta_anual)} · ${emp.meta_anual > 0 ? ((emp.real_anual/emp.meta_anual)*100).toFixed(1) : 0}%`,
+          font:{size:11, color:'#6B6560'}, xanchor:'center',
+        }],
+      }, plotCfg);
+
+      // Mini cards
+      const grid = document.getElementById(grid_id);
+      grid.innerHTML = meses.map(m => {
+        const w = Math.min(m.ating, 100);
+        const color = m.ating >= 100 ? '#10B981' : m.ating >= 70 ? '#F59E0B' : '#EF4444';
+        const cls   = m.ating >= 100 ? 'badge-green' : m.ating >= 70 ? 'badge-amber' : 'badge-red';
+        return `
+          <div class="meta-row">
+            <div class="meta-head">
+              <span class="meta-mes">${m.mes}</span>
+              <span class="meta-pct badge ${cls}">${m.ating.toFixed(1)}%</span>
+            </div>
+            <div class="meta-track"><div class="meta-fill" style="width:${w}%;background:${color}"></div></div>
+            <div class="meta-vals">
+              <span>${brl(m.real)}</span>
+              <span>meta ${brl(m.meta)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch(e) { console.error('Metas:', e); }
+}
+
+/* ── Table render ───────────────────────────────── */
+function renderClientesTable(containerId, clientes) {
+  if (!clientes || !clientes.length) {
+    document.getElementById(containerId).innerHTML = '<p style="color:var(--text3);padding:12px;font-size:13px;">Sem dados</p>';
+    return;
+  }
+  const maxRb = Math.max(...clientes.map(r => r.rb || 0));
+  const rows = clientes.map((r, i) => {
+    const w = maxRb > 0 ? (r.rb / maxRb * 100).toFixed(1) : 0;
+    const mgCls = (r.mg_pct||0) >= 25 ? 'badge-green' : (r.mg_pct||0) >= 10 ? 'badge-amber' : 'badge-red';
+    return `
+      <tr>
+        <td style="color:var(--text3);font-size:11px;">${i+1}</td>
+        <td class="bar-cell" style="position:relative; min-width:180px;">
+          <div class="bi-bar" style="width:${w}%"></div>
+          <span style="position:relative;">${r.cliente || '—'}</span>
+        </td>
+        <td class="r">${brl(r.rb)}</td>
+        <td class="r"><span class="badge ${mgCls}">${pct(r.mg_pct)}</span></td>
+        <td class="r">${n(r.notas)}</td>
+        <td class="r" style="color:var(--text3);">${pct(r.pct)} do total</td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById(containerId).innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="bi-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th class="r">Rec. Bruta</th>
+            <th class="r">Margem</th>
+            <th class="r">NFs</th>
+            <th class="r">% do Total</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ── Refresh All ────────────────────────────────── */
+async function refreshAll() {
+  const btn = document.getElementById('refresh-btn');
+  const ico = document.getElementById('refresh-icon');
+  btn.disabled = true; btn.classList.add('spinning');
+
+  // Limpa cache na API
+  try { await fetch(`${API_BASE}/api/refresh`, { method:'POST' }); } catch {}
+
+  await Promise.all([loadKpis(), loadDashboard()]);
+  if (activeTab === 'faturamento') await loadFaturamento();
+  if (activeTab === 'pedidos')     await loadPedidos();
+  if (activeTab === 'devolucoes')  await loadDevolucoes();
+  if (activeTab === 'metas')       await loadMetas();
+
+  document.getElementById('last-update').textContent = `Atualizado ${new Date().toLocaleTimeString('pt-BR')}`;
+  btn.disabled = false; btn.classList.remove('spinning');
+}
+
+/* ── Init ───────────────────────────────────────── */
+(async () => {
+  // Datas padrão: início do ano → hoje
+  const hoje = new Date();
+  const ini  = new Date(hoje.getFullYear(), 0, 1);
+  document.getElementById('f-end').value   = hoje.toISOString().slice(0,10);
+  document.getElementById('f-start').value = ini.toISOString().slice(0,10);
+
+  await checkStatus();
+  await loadKpis();
+  await loadDashboard();
+
+  document.getElementById('last-update').textContent = `Atualizado ${new Date().toLocaleTimeString('pt-BR')}`;
+
+  // Auto-refresh a cada 2 minutos
+  setInterval(async () => {
+    await checkStatus();
+    await loadKpis();
+    if (activeTab === 'dashboard') await loadDashboard();
+  }, 120_000);
+})();
+</script>
+</body>
+</html>
