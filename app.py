@@ -2,6 +2,8 @@
 app.py — Painel Executivo · BI GRUPO AGORA MAKERS
 Executa com: streamlit run app.py
 """
+# streamlit run "C:\Users\marcos.teixeira\Desktop\BI DEFINITIVO\painel_executivo\app.py"
+
 import streamlit as st
 import pandas as pd
 import sys, os
@@ -9,13 +11,15 @@ from datetime import date
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+# ── Página ────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="BI GRUPO AGORA MAKERS",
+    page_title="BI · Agora Makers",
     page_icon="◈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+# ── Session state ─────────────────────────────────────────────────────────────
 if "tema_escuro" not in st.session_state:
     st.session_state.tema_escuro = False
 if "sidebar_visivel" not in st.session_state:
@@ -26,15 +30,15 @@ DARK = st.session_state.tema_escuro
 from ui.estilos import aplicar_css
 aplicar_css(dark=DARK)
 
-# Ocultar sidebar quando usuário fechou
+# ── Ocultar sidebar quando fechada ───────────────────────────────────────────
 if not st.session_state.sidebar_visivel:
     st.markdown("""
     <style>
     [data-testid="stSidebar"] {
         display: none !important;
         width: 0 !important;
-        visibility: hidden !important;
         min-width: 0 !important;
+        visibility: hidden !important;
     }
     [data-testid="stMain"], section[data-testid="stMain"] {
         margin-left: 0 !important;
@@ -43,6 +47,7 @@ if not st.session_state.sidebar_visivel:
     </style>
     """, unsafe_allow_html=True)
 
+# ── Dados ─────────────────────────────────────────────────────────────────────
 PASTA_DADOS = os.path.join(os.path.dirname(__file__), "data")
 
 from ui.sidebar import renderizar_sidebar
@@ -55,12 +60,12 @@ n_linhas       = cfg["n_linhas"]
 data_inicio    = cfg["data_inicio"]
 data_fim       = cfg["data_fim"]
 
-from modulos.esc.pipeline import executar as exec_esc, build_esc_lookup
-from modulos.fat.pipeline import executar as exec_fat
+from modulos.esc.pipeline  import executar as exec_esc, build_esc_lookup
+from modulos.fat.pipeline  import executar as exec_fat
 from modulos.fat.calculos_base import set_esc_lookup
-from modulos.ped.pipeline import executar as exec_ped
-from modulos.ped.config import ANO_REFERENCIA
-from modulos.fat.config import COL_RB, COL_IMPOSTOS, COL_RL, COL_CPV, COL_MARGEM
+from modulos.ped.pipeline  import executar as exec_ped
+from modulos.ped.config    import ANO_REFERENCIA
+from modulos.fat.config    import COL_RB, COL_IMPOSTOS, COL_RL, COL_CPV, COL_MARGEM
 
 
 @st.cache_data(ttl=120, show_spinner=False)
@@ -69,12 +74,14 @@ def _load_esc(pasta):
 
 @st.cache_data(ttl=120, show_spinner=False)
 def _load_fat(pasta, fi, _key):
-    return exec_fat(pasta=pasta, flag_intercompany_omp=fi, flag_intercompany_mtc=fi, verbose=False)
+    return exec_fat(pasta=pasta, flag_intercompany_omp=fi,
+                    flag_intercompany_mtc=fi, verbose=False)
 
 @st.cache_data(ttl=120, show_spinner=False)
 def _load_ped(pasta, fi):
-    return exec_ped(pasta=pasta, flag_intercompany_omp=fi, flag_intercompany_mtc=fi,
-                    ano_ref=ANO_REFERENCIA, verbose=False)
+    return exec_ped(pasta=pasta, flag_intercompany_omp=fi,
+                    flag_intercompany_mtc=fi, ano_ref=ANO_REFERENCIA, verbose=False)
+
 
 _erro = ""
 d_esc = d_fat = d_ped = None
@@ -84,7 +91,7 @@ with st.spinner("Carregando dados…"):
         d_esc = _load_esc(PASTA_DADOS)
         lo, lm = build_esc_lookup(d_esc)
         set_esc_lookup(lo, lm)
-        _key = f"{flag_ic}_{len(lo)}_{len(lm)}"
+        _key  = f"{flag_ic}_{len(lo)}_{len(lm)}"
         d_fat = _load_fat(PASTA_DADOS, flag_ic, _key)
         d_ped = _load_ped(PASTA_DADOS, flag_ic)
     except Exception as e:
@@ -111,16 +118,16 @@ ped_f = {k: _filtrar(d_ped.get(k, _vz) if d_ped else _vz, "Data de emissão")
 fat_raw = {k: (d_fat.get(k, _vz) if d_fat else _vz) for k in ("omp", "mtc")}
 
 # ── Masthead ──────────────────────────────────────────────────────────────────
-_ic_label   = "IC ativo" if flag_ic == "SIM" else "IC desativado"
+_ic_label = "IC ativo" if flag_ic == "SIM" else "IC desativado"
 _per = (f"Até {data_fim.strftime('%d/%m/%Y')}" if not data_inicio
         else f"{data_inicio.strftime('%d/%m/%Y')} → {data_fim.strftime('%d/%m/%Y')}")
-_linhas_omp = f"{len(fat_f['omp']):,}" if not fat_f["omp"].empty else "0"
-_linhas_mtc = f"{len(fat_f['mtc']):,}" if not fat_f["mtc"].empty else "0"
+_nomp = f"{len(fat_f['omp']):,}" if not fat_f["omp"].empty else "0"
+_nmtc = f"{len(fat_f['mtc']):,}" if not fat_f["mtc"].empty else "0"
 
 _col_btn, _col_mast = st.columns([1, 11])
 with _col_btn:
-    _label_btn = "✕ Fechar" if st.session_state.sidebar_visivel else "⚙️ Config"
-    if st.button(_label_btn, key="app_btn_toggle_sidebar",
+    _lbl = "✕ Fechar" if st.session_state.sidebar_visivel else "⚙️ Config"
+    if st.button(_lbl, key="app_btn_toggle_sidebar",
                  help="Mostrar / ocultar configurações", use_container_width=True):
         st.session_state.sidebar_visivel = not st.session_state.sidebar_visivel
         st.rerun()
@@ -128,20 +135,20 @@ with _col_btn:
 with _col_mast:
     st.markdown(f"""
     <div class="masthead">
-      <div class="masthead-rule"></div>
       <div class="masthead-body">
         <div class="masthead-left">
           <div class="masthead-logo-wrap">
-            <svg viewBox="0 0 16 16" fill="white">
-              <rect x="2" y="2" width="5" height="5" rx="1"/>
-              <rect x="9" y="2" width="5" height="5" rx="1"/>
-              <rect x="2" y="9" width="5" height="5" rx="1"/>
-              <rect x="9" y="9" width="5" height="5" rx="1"/>
+            <svg viewBox="0 0 40 40" width="30" height="30" fill="none">
+              <rect x="4"  y="4"  width="14" height="14" rx="3.5" fill="white" opacity=".90"/>
+              <rect x="22" y="4"  width="14" height="14" rx="3.5" fill="white" opacity=".55"/>
+              <rect x="4"  y="22" width="14" height="14" rx="3.5" fill="white" opacity=".55"/>
+              <rect x="22" y="22" width="14" height="14" rx="3.5" fill="#5CB88A" opacity=".90"/>
+              <circle cx="20" cy="20" r="2.5" fill="white" opacity=".35"/>
             </svg>
           </div>
           <div>
-            <div class="masthead-eyebrow">Grupo Agora Makers</div>
-            <div class="masthead-brand">Painel Executivo</div>
+            <div class="masthead-eyebrow">Grupo Agora Makers · BI Executivo</div>
+            <div class="masthead-brand">Painel de Gestão</div>
             <div class="masthead-chips">
               <span class="mchip"><span class="live-dot"></span>ao vivo</span>
               <span class="mchip">📅 {_per}</span>
@@ -152,12 +159,12 @@ with _col_mast:
         <div class="masthead-right">
           <div class="mstat-group">
             <div class="mstat">
-              <div class="mstat-val">{_linhas_omp}</div>
-              <div class="mstat-lbl">My City</div>
+              <div class="mstat-val">{_nomp}</div>
+              <div class="mstat-lbl">🏙️ My City</div>
             </div>
             <div class="mstat">
-              <div class="mstat-val">{_linhas_mtc}</div>
-              <div class="mstat-lbl">Metalco</div>
+              <div class="mstat-val">{_nmtc}</div>
+              <div class="mstat-lbl">⚙️ Metalco</div>
             </div>
           </div>
         </div>
@@ -192,7 +199,7 @@ st.markdown(f"""
   <div class="kha-card">
     <div class="kha-icon" style="background:#EBF1FF">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path d="M2 12 L6 8 L10 10 L14 4" stroke="#1A6BF5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L6 8l4 2 4-6" stroke="#1A6BF5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="kha-label">Receita Bruta</div>
@@ -202,8 +209,8 @@ st.markdown(f"""
   <div class="kha-card">
     <div class="kha-icon" style="background:#FFE4EC">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="5" stroke="#E11D48" stroke-width="1.5"/>
-        <path d="M8 5v3l2 2" stroke="#E11D48" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="8" r="5" stroke="#E11D48" stroke-width="1.6"/>
+        <path d="M8 5v3l2 2" stroke="#E11D48" stroke-width="1.6" stroke-linecap="round"/>
       </svg>
     </div>
     <div class="kha-label">Impostos</div>
@@ -225,7 +232,7 @@ st.markdown(f"""
   <div class="kha-card">
     <div class="kha-icon" style="background:#FEF3C7">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path d="M3 13 L8 3 L13 13 Z" stroke="#D97706" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M3 13L8 3l5 10Z" stroke="#D97706" stroke-width="1.6" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="kha-label">CPV</div>
@@ -235,17 +242,17 @@ st.markdown(f"""
   <div class="kha-card">
     <div class="kha-icon" style="background:#E6F4EC">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path d="M2 11 L6 7 L10 9 L14 4" stroke="#3D6B56" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 11L6 7l4 2 4-5" stroke="#3D6B56" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    <div class="kha-label">Margem</div>
+    <div class="kha-label">Margem Bruta</div>
     <div class="kha-value">{_kv(_mg)}</div>
     <div class="kha-sub">{_mg_p}</div>
   </div>
   <div class="kha-card">
     <div class="kha-icon" style="background:#F0F2F5">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path d="M2 14V6M6 14V4M10 14V8M14 14V2" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M2 14V6M6 14V4M10 14V8M14 14V2" stroke="#6B7280" stroke-width="1.6" stroke-linecap="round"/>
       </svg>
     </div>
     <div class="kha-label">Notas Fiscais</div>
@@ -255,8 +262,8 @@ st.markdown(f"""
   <div class="kha-card">
     <div class="kha-icon" style="background:#EDE9FE">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <circle cx="6" cy="6.5" r="2.5" stroke="#7C3AED" stroke-width="1.5"/>
-        <circle cx="11" cy="10.5" r="2.5" stroke="#7C3AED" stroke-width="1.5"/>
+        <circle cx="6" cy="6.5" r="2.5" stroke="#7C3AED" stroke-width="1.6"/>
+        <circle cx="11" cy="10.5" r="2.5" stroke="#7C3AED" stroke-width="1.6"/>
       </svg>
     </div>
     <div class="kha-label">Clientes</div>
@@ -268,39 +275,94 @@ st.markdown(f"""
 
 if _erro:
     st.error(f"❌ Erro ao carregar dados: {_erro}")
-    st.info("Verifique se os CSVs estão na pasta `data/` e clique em **Reprocessar**.")
+    st.info("Verifique se os CSVs estão na pasta `data/` e clique em **Reprocessar** na sidebar.")
 
-tab_bi, tab_dados = st.tabs(["◈  BI GRUPO AGORA MAKERS", "⚙  Dados & Cálculos"])
+# ══════════════════════════════════════════════════════════════════════════════
+#  ABAS PRINCIPAIS
+# ══════════════════════════════════════════════════════════════════════════════
+tab_dash, tab_fat, tab_ped, tab_dev, tab_metas, tab_dados = st.tabs([
+    "◈  Dashboard",
+    "📊  Faturamento",
+    "📋  Pedidos",
+    "↩️  Devoluções",
+    "🎯  Metas",
+    "⚙️  Dados & Fórmulas",
+])
 
-with tab_bi:
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 1 — DASHBOARD GERAL
+# ──────────────────────────────────────────────────────────────────────────────
+with tab_dash:
     from ui.abas.aba_dashboard import renderizar as _dashboard
-    _dashboard(df_omp=fat_f["omp"], df_mtc=fat_f["mtc"], df_cons=fat_f["consolidado"],
-               data_inicio=data_inicio, data_fim=data_fim, dark=DARK)
+    _dashboard(
+        df_omp=fat_f["omp"],
+        df_mtc=fat_f["mtc"],
+        df_cons=fat_f["consolidado"],
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        dark=DARK,
+    )
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 2 — FATURAMENTO  (sub-abas: My City | Metalco | Consolidado | Comercial)
+# ──────────────────────────────────────────────────────────────────────────────
+with tab_fat:
+    from ui.abas.aba_faturamento import (
+        renderizar_empresa as _fat_emp,
+        renderizar_consolidado as _fat_cons,
+    )
+    sf_omp, sf_mtc, sf_cons = st.tabs([
+        "🏙️  My City",
+        "⚙️  Metalco",
+        "📊  Consolidado",
+    ])
+    with sf_omp:  _fat_emp(fat_f["omp"], "My City", n_linhas, mostrar_vazios)
+    with sf_mtc:  _fat_emp(fat_f["mtc"], "Metalco", n_linhas, mostrar_vazios)
+    with sf_cons: _fat_cons(fat_f["consolidado"])
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 3 — PEDIDOS  (sub-abas: My City | Metalco)
+# ──────────────────────────────────────────────────────────────────────────────
+with tab_ped:
+    from ui.abas.aba_pedidos import renderizar_empresa as _ped_emp
+    sp_omp, sp_mtc = st.tabs(["🏙️  My City", "⚙️  Metalco"])
+    with sp_omp: _ped_emp(ped_f["omp"], "My City", n_linhas)
+    with sp_mtc: _ped_emp(ped_f["mtc"], "Metalco", n_linhas)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 4 — DEVOLUÇÕES  (sub-abas: My City | Metalco | Consolidado)
+# ──────────────────────────────────────────────────────────────────────────────
+with tab_dev:
+    from ui.abas.aba_devolucoes import (
+        renderizar_empresa as _esc_emp,
+        renderizar_consolidado as _esc_cons,
+    )
+    sd_omp, sd_mtc, sd_cons = st.tabs([
+        "🏙️  My City",
+        "⚙️  Metalco",
+        "📊  Consolidado",
+    ])
+    with sd_omp:  _esc_emp(d_esc["omp"] if d_esc else _vz, "My City", n_linhas)
+    with sd_mtc:  _esc_emp(d_esc["mtc"] if d_esc else _vz, "Metalco", n_linhas)
+    with sd_cons: _esc_cons(
+        d_esc["omp"] if d_esc else _vz,
+        d_esc["mtc"] if d_esc else _vz,
+    )
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 5 — METAS
+# ──────────────────────────────────────────────────────────────────────────────
+with tab_metas:
+    from ui.abas.aba_metas import renderizar as _metas
+    _metas(fat_raw["omp"], fat_raw["mtc"])
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  TAB 6 — DADOS & FÓRMULAS  (sub-abas: Fórmulas | Exportar)
+# ──────────────────────────────────────────────────────────────────────────────
 with tab_dados:
-    from ui.abas.aba_faturamento import renderizar_empresa as _fat_emp, renderizar_consolidado as _fat_cons
-    from ui.abas.aba_devolucoes  import renderizar_empresa as _esc_emp, renderizar_consolidado as _esc_cons
-    from ui.abas.aba_pedidos  import renderizar_empresa as _ped_emp
-    from ui.abas.aba_metas    import renderizar as _metas
     from ui.abas.aba_logica   import renderizar as _log
     from ui.abas.aba_exportar import renderizar as _exportar
 
-    sub = st.tabs([
-        "🏙️ FAT My City", "⚙️ FAT Metalco", "📊 FAT Consolidado",
-        "↩️ DEV My City", "↩️ DEV Metalco", "↩️ DEV Consolidado",
-        "📋 PED My City", "📋 PED Metalco",
-        "🎯 Metas", "🔎 Fórmulas", "📥 Exportar",
-    ])
-    (s_fo, s_fm, s_fc, s_eo, s_em, s_ec, s_po, s_pm, s_met, s_log, s_exp) = sub
-
-    with s_fo:  _fat_emp(fat_f["omp"],  "My City", n_linhas, mostrar_vazios)
-    with s_fm:  _fat_emp(fat_f["mtc"],  "Metalco", n_linhas, mostrar_vazios)
-    with s_fc:  _fat_cons(fat_f["consolidado"])
-    with s_eo:  _esc_emp(d_esc["omp"] if d_esc else _vz, "My City", n_linhas)
-    with s_em:  _esc_emp(d_esc["mtc"] if d_esc else _vz, "Metalco", n_linhas)
-    with s_ec:  _esc_cons(d_esc["omp"] if d_esc else _vz, d_esc["mtc"] if d_esc else _vz)
-    with s_po:  _ped_emp(ped_f["omp"], "My City", n_linhas)
-    with s_pm:  _ped_emp(ped_f["mtc"], "Metalco", n_linhas)
-    with s_met: _metas(fat_raw["omp"], fat_raw["mtc"])
-    with s_log: _log()
-    with s_exp: _exportar(d_fat, d_esc, d_ped)
+    sl_log, sl_exp = st.tabs(["🔎  Fórmulas & Lógica", "📥  Exportar dados"])
+    with sl_log: _log()
+    with sl_exp: _exportar(d_fat, d_esc, d_ped)

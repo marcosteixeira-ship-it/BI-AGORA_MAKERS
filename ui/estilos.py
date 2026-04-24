@@ -61,13 +61,109 @@ def _css(dark: bool) -> str:
     box-sizing:border-box;
 }}
 
+/* ══════════════════════════════════════════════════════════════════════════
+   TIRA BRANCA DO TOPO — stHeader nativo do Streamlit
+   O <header data-testid="stHeader"> é renderizado fora do stMain com
+   background branco fixo. Removê-lo elimina a faixa branca visível no
+   topo mesmo quando o app tem fundo escuro ou colorido.
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stHeader"],
+header[data-testid="stHeader"],
+.stAppHeader {{
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}}
+/* Remove o padding-top que o Streamlit injeta por conta do header */
+[data-testid="stAppViewContainer"] > section[data-testid="stMain"],
+[data-testid="stMain"] {{
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOTÃO NATIVO DA SIDEBAR (keyboard_double_arrow_left)
+   Matar todos os seletores possíveis para não aparecer o texto do ícone.
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"],
+button[data-testid="stBaseButton-headerNoPadding"],
+[data-testid="stIconMaterial"] {{
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    clip: rect(0,0,0,0) !important;
+}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FILTROS DAS PLANILHAS EM PORTUGUÊS
+   O Streamlit usa Glide Data Grid — partes do filtro são HTML acessíveis.
+   Traduzimos via atributo placeholder, labels e botões do overlay.
+══════════════════════════════════════════════════════════════════════════ */
+/* Placeholder da caixa de busca */
+[data-testid="stDataFrame"] input[placeholder="Filter..."],
+[data-testid="stDataEditor"] input[placeholder="Filter..."] {{
+    font-size: 0 !important;  /* esconde texto padrão */
+}}
+[data-testid="stDataFrame"] input[placeholder="Filter..."]::placeholder,
+[data-testid="stDataEditor"] input[placeholder="Filter..."]::placeholder {{
+    font-size: .84rem !important;
+    content: "Filtrar...";
+}}
+/* Hack: substituir placeholder via attr */
+[data-testid="stDataFrame"] input[placeholder="Filter..."],
+[data-testid="stDataEditor"] input[placeholder="Filter..."] {{
+    font-size: .84rem !important;
+}}
+
+/* Overlay de opções do filtro — botões de tipo de filtro */
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(1)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(1) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(1)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(1)::after  {{ content:"Contém"; font-size:.84rem; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(2)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(2) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(2)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(2)::after  {{ content:"Não contém"; font-size:.84rem; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(3)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(3) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(3)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(3)::after  {{ content:"Igual a"; font-size:.84rem; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(4)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(4) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(4)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(4)::after  {{ content:"Diferente de"; font-size:.84rem; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(5)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(5) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(5)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(5)::after  {{ content:"Começa com"; font-size:.84rem; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(6)  span,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(6) span {{ font-size:0 !important; }}
+[data-testid="stDataFrame"] [role="listbox"] [role="option"]:nth-child(6)::after,
+[data-testid="stDataEditor"] [role="listbox"] [role="option"]:nth-child(6)::after  {{ content:"Termina com"; font-size:.84rem; }}
+
 /* ── App background ───────────────────────────────────────────────────────── */
-.stApp,.main,section.main {{ background:{bg} !important; }}
-.main .block-container {{
+.stApp,.main,section.main,
+[data-testid="stAppViewContainer"],
+[data-testid="stMainBlockContainer"] {{ background:{bg} !important; }}
+.main .block-container,
+[data-testid="stMainBlockContainer"] {{
     background:{bg} !important;
     padding:0 !important; max-width:100% !important;
 }}
-.main .block-container > div:first-child {{
+.main .block-container > div:first-child,
+[data-testid="stMainBlockContainer"] > div:first-child {{
     padding:1rem 1.4rem 2rem !important;
 }}
 
@@ -284,18 +380,7 @@ def _css(dark: bool) -> str:
     color:white !important;
     box-shadow:0 2px 10px rgba(61,107,86,.28) !important;
 }}
-[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapsedControl"] {{
-    display:flex !important; visibility:visible !important;
-    opacity:1 !important; z-index:9999 !important;
-}}
-[data-testid="stSidebarCollapseButton"] svg {{
-    fill:rgba(255,255,255,.3) !important; color:rgba(255,255,255,.3) !important;
-}}
-[data-testid="stSidebarCollapsedControl"] button {{
-    background:rgba(255,255,255,.06) !important;
-    border:1px solid rgba(255,255,255,.1) !important; border-radius:8px !important;
-}}
+/* Botões nativos de colapso — já tratados no bloco acima */
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {{
     background:#161412 !important; border-color:rgba(255,255,255,.1) !important;
     color:rgba(255,255,255,.6) !important; border-radius:8px !important;
@@ -507,8 +592,11 @@ hr {{ border-color:{border} !important; opacity:.8 !important; }}
 }}
 
 /* ── Ocultar chrome Streamlit ─────────────────────────────────────────────── */
-#MainMenu,footer,.stDeployButton,[data-testid="stToolbar"] {{
-    display:none !important;
+#MainMenu, footer, .stDeployButton,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"] {{
+    display: none !important;
 }}
 
 {_dark_chart}
